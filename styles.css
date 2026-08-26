@@ -255,6 +255,44 @@ section:not(.hero) {
   cursor: pointer;
 }
 
+/* Merch */
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 32px;
+}
+
+.merch-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.merch-photo {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.merch-photo span {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.merch-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+}
+.merch-name { font-size: 0.95rem; font-weight: 500; }
+.merch-price { font-size: 0.85rem; color: var(--text-dim); }
+
 /* Booking */
 .booking-grid {
   display: grid;
