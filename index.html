@@ -10,6 +10,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('halisi-theme');
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 
@@ -26,6 +35,7 @@
       <li><a href="#merch">merch</a></li>
       <li><a href="#booking">bookings</a></li>
       <li><a href="#socials">socials</a></li>
+      <li><button class="theme-toggle" id="themeToggle" aria-label="Toggle color theme">light</button></li>
     </ul>
   </nav>
 </header>
@@ -33,6 +43,9 @@
 <main>
 
   <section class="hero" id="home">
+    <div class="hero-media">
+      <img src="https://picsum.photos/seed/halisi-hero/1600/1600" alt="" class="hero-photo" loading="eager">
+    </div>
     <div class="container hero-inner">
       <h1 class="hero-title">HALISI</h1>
       <p class="hero-tagline">afrobeats &middot; amapiano &middot; afrohouse</p>
@@ -40,11 +53,11 @@
     <a href="#bio" class="scroll-cue" aria-label="Scroll down"><span></span></a>
   </section>
 
-  <section class="bio" id="bio">
+  <section class="bio reveal" id="bio">
     <div class="container bio-grid">
       <div class="bio-photo">
         <div class="photo-placeholder">
-          <span>press photo</span>
+          <img src="https://picsum.photos/seed/halisi-press/600/750" alt="Halisi press photo" loading="lazy">
         </div>
       </div>
       <div class="bio-copy">
@@ -57,7 +70,7 @@
     </div>
   </section>
 
-  <section class="mixes" id="mixes">
+  <section class="mixes reveal" id="mixes">
     <div class="container">
       <p class="section-label">02 — Listen</p>
       <div class="list">
@@ -89,7 +102,7 @@
     </div>
   </section>
 
-  <section class="events" id="events">
+  <section class="events reveal" id="events">
     <div class="container">
       <p class="section-label">03 — Live</p>
       <div class="list">
@@ -121,12 +134,12 @@
     </div>
   </section>
 
-  <section class="merch" id="merch">
+  <section class="merch reveal" id="merch">
     <div class="container">
       <p class="section-label">04 — Merch</p>
       <div class="merch-grid">
         <article class="merch-item">
-          <div class="merch-photo"><span>product photo</span></div>
+          <div class="merch-photo"><img src="https://picsum.photos/seed/halisi-tee/500/500" alt="Halisi Logo Tee" loading="lazy"></div>
           <div class="merch-info">
             <span class="merch-name">Halisi Logo Tee</span>
             <span class="merch-price">$35</span>
@@ -134,7 +147,7 @@
           <a href="#" class="list-link">buy</a>
         </article>
         <article class="merch-item">
-          <div class="merch-photo"><span>product photo</span></div>
+          <div class="merch-photo"><img src="https://picsum.photos/seed/halisi-hoodie/500/500" alt="Afrohouse Hoodie" loading="lazy"></div>
           <div class="merch-info">
             <span class="merch-name">Afrohouse Hoodie</span>
             <span class="merch-price">$60</span>
@@ -142,7 +155,7 @@
           <a href="#" class="list-link">buy</a>
         </article>
         <article class="merch-item">
-          <div class="merch-photo"><span>product photo</span></div>
+          <div class="merch-photo"><img src="https://picsum.photos/seed/halisi-cap/500/500" alt="Halisi Snapback" loading="lazy"></div>
           <div class="merch-info">
             <span class="merch-name">Halisi Snapback</span>
             <span class="merch-price">$28</span>
@@ -150,7 +163,7 @@
           <a href="#" class="list-link">buy</a>
         </article>
         <article class="merch-item">
-          <div class="merch-photo"><span>product photo</span></div>
+          <div class="merch-photo"><img src="https://picsum.photos/seed/halisi-stickers/500/500" alt="Sticker Pack" loading="lazy"></div>
           <div class="merch-info">
             <span class="merch-name">Sticker Pack</span>
             <span class="merch-price">$10</span>
@@ -161,7 +174,7 @@
     </div>
   </section>
 
-  <section class="booking" id="booking">
+  <section class="booking reveal" id="booking">
     <div class="container booking-grid">
       <div class="booking-copy">
         <p class="section-label">05 — Bookings</p>
@@ -204,7 +217,7 @@
     </div>
   </section>
 
-  <section class="socials" id="socials">
+  <section class="socials reveal" id="socials">
     <div class="container">
       <p class="section-label">06 — Socials</p>
       <div class="social-links">
