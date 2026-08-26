@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Halisi — DJ</title>
+<meta name="description" content="Halisi — house &amp; electronic DJ. Mixes, live dates, and bookings.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◆</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header" id="top">
+  <nav class="nav container">
+    <a class="logo" href="#top">Halisi</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#bio">about</a></li>
+      <li><a href="#mixes">mixes</a></li>
+      <li><a href="#events">live</a></li>
+      <li><a href="#booking">bookings</a></li>
+      <li><a href="#socials">socials</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero" id="home">
+    <div class="container hero-inner">
+      <h1 class="hero-title">HALISI</h1>
+      <p class="hero-tagline">house &amp; melodic techno</p>
+    </div>
+    <a href="#bio" class="scroll-cue" aria-label="Scroll down"><span></span></a>
+  </section>
+
+  <section class="bio" id="bio">
+    <div class="container bio-grid">
+      <div class="bio-photo">
+        <div class="photo-placeholder">
+          <span>press photo</span>
+        </div>
+      </div>
+      <div class="bio-copy">
+        <p class="section-label">01 — About</p>
+        <p class="bio-text">Halisi has spent the last eight years behind the decks turning warehouse parties, rooftop sessions, and wedding dancefloors into unforgettable nights. Rooted in classic house and disco, with a melodic techno edge, every set is read live and built for the room in front of it.</p>
+        <div class="bio-stats">
+          <div><strong>150+</strong><span>shows played</span></div>
+          <div><strong>8</strong><span>years behind the decks</span></div>
+          <div><strong>40k+</strong><span>monthly listeners</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mixes" id="mixes">
+    <div class="container">
+      <p class="section-label">02 — Listen</p>
+      <div class="list">
+        <article class="list-row" data-mix>
+          <button class="play-dot" aria-label="Play mix"></button>
+          <span class="list-title">Midnight in Motion</span>
+          <span class="list-meta">Deep House</span>
+          <span class="list-meta">62 min</span>
+        </article>
+        <article class="list-row" data-mix>
+          <button class="play-dot" aria-label="Play mix"></button>
+          <span class="list-title">Rooftop Sessions Vol. 3</span>
+          <span class="list-meta">Melodic Techno</span>
+          <span class="list-meta">74 min</span>
+        </article>
+        <article class="list-row" data-mix>
+          <button class="play-dot" aria-label="Play mix"></button>
+          <span class="list-title">Sunset Warehouse</span>
+          <span class="list-meta">Disco / Nu-Disco</span>
+          <span class="list-meta">58 min</span>
+        </article>
+        <article class="list-row" data-mix>
+          <button class="play-dot" aria-label="Play mix"></button>
+          <span class="list-title">Basement Tape 04</span>
+          <span class="list-meta">Tech House</span>
+          <span class="list-meta">66 min</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="events" id="events">
+    <div class="container">
+      <p class="section-label">03 — Live</p>
+      <div class="list">
+        <div class="list-row">
+          <span class="list-date">14 Sep</span>
+          <span class="list-title">Neon Warehouse — Opening Set</span>
+          <span class="list-meta">The Grid Warehouse, Los Angeles</span>
+          <a href="#" class="list-link">tickets</a>
+        </div>
+        <div class="list-row">
+          <span class="list-date">28 Sep</span>
+          <span class="list-title">Rooftop Sessions</span>
+          <span class="list-meta">Skyline Lounge, San Diego</span>
+          <a href="#" class="list-link">tickets</a>
+        </div>
+        <div class="list-row">
+          <span class="list-date">11 Oct</span>
+          <span class="list-title">Afterglow Festival</span>
+          <span class="list-meta">Desert Grounds, Palm Springs</span>
+          <a href="#" class="list-link">tickets</a>
+        </div>
+        <div class="list-row">
+          <span class="list-date">02 Nov</span>
+          <span class="list-title">Club Aurora — Resident Night</span>
+          <span class="list-meta">Aurora, Los Angeles</span>
+          <a href="#" class="list-link">tickets</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="booking" id="booking">
+    <div class="container booking-grid">
+      <div class="booking-copy">
+        <p class="section-label">04 — Bookings</p>
+        <p class="bio-text">Weddings, clubs, festivals, private events. Send the details below and expect a reply within 48 hours.</p>
+        <a class="contact-email" href="mailto:booking@halisi.example">booking@halisi.example</a>
+      </div>
+
+      <form class="booking-form" id="bookingForm" novalidate>
+        <div class="form-row">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-row">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-row form-row-split">
+          <div>
+            <label for="eventType">Event type</label>
+            <select id="eventType" name="eventType">
+              <option>Club / Nightlife</option>
+              <option>Wedding</option>
+              <option>Private Party</option>
+              <option>Festival</option>
+              <option>Corporate</option>
+            </select>
+          </div>
+          <div>
+            <label for="eventDate">Event date</label>
+            <input type="date" id="eventDate" name="eventDate">
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="message">Details</label>
+          <textarea id="message" name="message" rows="3" placeholder="Venue, city, expected guests, set length..." required></textarea>
+        </div>
+        <button type="submit" class="btn-text">Send inquiry &rarr;</button>
+        <p class="form-status" id="formStatus" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="socials" id="socials">
+    <div class="container">
+      <p class="section-label">05 — Socials</p>
+      <div class="social-links">
+        <a href="#">Instagram</a>
+        <a href="#">SoundCloud</a>
+        <a href="#">Spotify</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <a class="logo" href="#top">Halisi</a>
+    <p>&copy; <span id="year"></span></p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
