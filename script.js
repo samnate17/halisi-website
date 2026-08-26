@@ -30,14 +30,97 @@ window.addEventListener('scroll', () => {
 });
 
 // Mix "play" demo state (visual only — wire up real audio/embeds later)
-const mixRows = document.querySelectorAll('[data-mix]');
-mixRows.forEach((row) => {
-  row.addEventListener('click', () => {
-    const wasPlaying = row.classList.contains('playing');
-    mixRows.forEach((r) => r.classList.remove('playing'));
-    if (!wasPlaying) row.classList.add('playing');
+function wireMixRows() {
+  const mixRows = document.querySelectorAll('[data-mix]');
+  mixRows.forEach((row) => {
+    row.addEventListener('click', () => {
+      const wasPlaying = row.classList.contains('playing');
+      mixRows.forEach((r) => r.classList.remove('playing'));
+      if (!wasPlaying) row.classList.add('playing');
+    });
   });
-});
+}
+
+// Render site content from content.json (edited via /admin)
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function renderContent(data) {
+  const heroTagline = document.getElementById('heroTagline');
+  if (heroTagline && data.bio?.tagline) heroTagline.textContent = data.bio.tagline;
+
+  const bioText = document.getElementById('bioText');
+  if (bioText && data.bio?.text) bioText.textContent = data.bio.text;
+
+  const yearsActive = document.getElementById('yearsActive');
+  if (yearsActive && data.bio?.yearsActive != null) yearsActive.textContent = data.bio.yearsActive;
+
+  const mixesList = document.getElementById('mixesList');
+  if (mixesList && Array.isArray(data.mixes)) {
+    mixesList.innerHTML = data.mixes.map((mix) => `
+      <article class="list-row" data-mix>
+        <button class="play-dot" aria-label="Play mix"></button>
+        <span class="list-title">${escapeHtml(mix.title)}</span>
+        <span class="list-meta">${escapeHtml(mix.genre)}</span>
+        <span class="list-meta">${escapeHtml(mix.duration)}</span>
+      </article>
+    `).join('');
+  }
+
+  const eventsList = document.getElementById('eventsList');
+  if (eventsList && Array.isArray(data.events)) {
+    eventsList.innerHTML = data.events.map((ev) => `
+      <div class="list-row">
+        <span class="list-date">${escapeHtml(ev.day)} ${escapeHtml(ev.month)}</span>
+        <span class="list-title">${escapeHtml(ev.title)}</span>
+        <span class="list-meta">${escapeHtml(ev.venue)}</span>
+        <a href="${escapeHtml(ev.ticketUrl || '#')}" class="list-link">tickets</a>
+      </div>
+    `).join('');
+  }
+
+  const merchGrid = document.getElementById('merchGrid');
+  if (merchGrid && Array.isArray(data.merch)) {
+    merchGrid.innerHTML = data.merch.map((item) => `
+      <article class="merch-item">
+        <div class="merch-photo"><img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy"></div>
+        <div class="merch-info">
+          <span class="merch-name">${escapeHtml(item.name)}</span>
+          <span class="merch-price">${escapeHtml(item.price)}</span>
+        </div>
+        <a href="${escapeHtml(item.buyUrl || '#')}" class="list-link">buy</a>
+      </article>
+    `).join('');
+  }
+
+  const bookingBlurb = document.getElementById('bookingBlurb');
+  if (bookingBlurb && data.booking?.blurb) bookingBlurb.textContent = data.booking.blurb;
+
+  const bookingEmail = document.getElementById('bookingEmail');
+  if (bookingEmail && data.booking?.email) {
+    bookingEmail.textContent = data.booking.email;
+    bookingEmail.href = `mailto:${data.booking.email}`;
+  }
+
+  const socialInstagram = document.getElementById('socialInstagram');
+  if (socialInstagram && data.socials?.instagramUrl) socialInstagram.href = data.socials.instagramUrl;
+
+  const socialSoundcloud = document.getElementById('socialSoundcloud');
+  if (socialSoundcloud && data.socials?.soundcloudUrl) socialSoundcloud.href = data.socials.soundcloudUrl;
+
+  const socialSpotify = document.getElementById('socialSpotify');
+  if (socialSpotify && data.socials?.spotifyUrl) socialSpotify.href = data.socials.spotifyUrl;
+
+  wireMixRows();
+}
+
+fetch('content.json')
+  .then((res) => res.json())
+  .then(renderContent)
+  .catch((err) => console.error('Could not load content.json', err));
 
 // Booking form (front-end only demo — replace with real submit handler)
 const bookingForm = document.getElementById('bookingForm');
