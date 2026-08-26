@@ -50,7 +50,7 @@
     </div>
     <div class="container hero-inner">
       <h1 class="hero-title">HALISI</h1>
-      <p class="hero-tagline">afrobeats &middot; amapiano &middot; afrohouse</p>
+      <p class="hero-tagline" id="heroTagline">afrobeats &middot; amapiano &middot; afrohouse</p>
     </div>
     <a href="#bio" class="scroll-cue" aria-label="Scroll down"><span></span></a>
   </section>
@@ -64,9 +64,9 @@
       </div>
       <div class="bio-copy">
         <p class="section-label">01 — About</p>
-        <p class="bio-text">Halisi is a Kenyan-born DJ who has spent the last three years turning private gigs, clubs, and day parties into unforgettable experiences — blending Afrobeats energy, Amapiano's log-drum groove, and the deep pulse of Afrohouse into sets read live for the room in front of them.</p>
+        <p class="bio-text" id="bioText">Halisi is a Kenyan-born DJ who has spent the last three years turning private gigs, clubs, and day parties into unforgettable experiences — blending Afrobeats energy, Amapiano's log-drum groove, and the deep pulse of Afrohouse into sets read live for the room in front of them.</p>
         <div class="bio-stats">
-          <div><strong>3</strong><span>years behind the decks</span></div>
+          <div><strong id="yearsActive">3</strong><span>years behind the decks</span></div>
         </div>
       </div>
     </div>
@@ -75,104 +75,21 @@
   <section class="mixes reveal" id="mixes">
     <div class="container">
       <p class="section-label">02 — Listen</p>
-      <div class="list">
-        <article class="list-row" data-mix>
-          <button class="play-dot" aria-label="Play mix"></button>
-          <span class="list-title">Midnight in Motion</span>
-          <span class="list-meta">Afrobeats</span>
-          <span class="list-meta">62 min</span>
-        </article>
-        <article class="list-row" data-mix>
-          <button class="play-dot" aria-label="Play mix"></button>
-          <span class="list-title">Rooftop Sessions Vol. 3</span>
-          <span class="list-meta">Amapiano</span>
-          <span class="list-meta">74 min</span>
-        </article>
-        <article class="list-row" data-mix>
-          <button class="play-dot" aria-label="Play mix"></button>
-          <span class="list-title">Sunset Warehouse</span>
-          <span class="list-meta">Afrohouse</span>
-          <span class="list-meta">58 min</span>
-        </article>
-        <article class="list-row" data-mix>
-          <button class="play-dot" aria-label="Play mix"></button>
-          <span class="list-title">Basement Tape 04</span>
-          <span class="list-meta">Afro / Amapiano</span>
-          <span class="list-meta">66 min</span>
-        </article>
-      </div>
+      <div class="list" id="mixesList"></div>
     </div>
   </section>
 
   <section class="events reveal" id="events">
     <div class="container">
       <p class="section-label">03 — Live</p>
-      <div class="list">
-        <div class="list-row">
-          <span class="list-date">14 Sep</span>
-          <span class="list-title">Neon Warehouse — Opening Set</span>
-          <span class="list-meta">The Grid Warehouse, Los Angeles</span>
-          <a href="#" class="list-link">tickets</a>
-        </div>
-        <div class="list-row">
-          <span class="list-date">28 Sep</span>
-          <span class="list-title">Rooftop Sessions</span>
-          <span class="list-meta">Skyline Lounge, San Diego</span>
-          <a href="#" class="list-link">tickets</a>
-        </div>
-        <div class="list-row">
-          <span class="list-date">11 Oct</span>
-          <span class="list-title">Sunday Day Party</span>
-          <span class="list-meta">Desert Grounds, Palm Springs</span>
-          <a href="#" class="list-link">tickets</a>
-        </div>
-        <div class="list-row">
-          <span class="list-date">02 Nov</span>
-          <span class="list-title">Club Aurora — Guest Set</span>
-          <span class="list-meta">Aurora, Los Angeles</span>
-          <a href="#" class="list-link">tickets</a>
-        </div>
-      </div>
+      <div class="list" id="eventsList"></div>
     </div>
   </section>
 
   <section class="merch reveal" id="merch">
     <div class="container">
       <p class="section-label">04 — Merch</p>
-      <div class="merch-grid">
-        <article class="merch-item">
-          <div class="merch-photo"><img src="https://images.unsplash.com/photo-1543940610-e7e6c111ea10?q=80&w=500&h=500&fit=crop&auto=format" alt="Halisi Logo Tee" loading="lazy"></div>
-          <div class="merch-info">
-            <span class="merch-name">Halisi Logo Tee</span>
-            <span class="merch-price">$35</span>
-          </div>
-          <a href="#" class="list-link">buy</a>
-        </article>
-        <article class="merch-item">
-          <div class="merch-photo"><img src="https://images.unsplash.com/photo-1594623930572-300a3011d9ae?q=80&w=500&h=500&fit=crop&auto=format" alt="Afrohouse Hoodie" loading="lazy"></div>
-          <div class="merch-info">
-            <span class="merch-name">Afrohouse Hoodie</span>
-            <span class="merch-price">$60</span>
-          </div>
-          <a href="#" class="list-link">buy</a>
-        </article>
-        <article class="merch-item">
-          <div class="merch-photo"><img src="https://images.unsplash.com/photo-1648738673511-16dd92b30d3b?q=80&w=500&h=500&fit=crop&auto=format" alt="Halisi Snapback" loading="lazy"></div>
-          <div class="merch-info">
-            <span class="merch-name">Halisi Snapback</span>
-            <span class="merch-price">$28</span>
-          </div>
-          <a href="#" class="list-link">buy</a>
-        </article>
-        <article class="merch-item">
-          <div class="merch-photo"><img src="https://images.unsplash.com/photo-1544785349-c4a5301826fd?q=80&w=500&h=500&fit=crop&auto=format" alt="Sticker Pack" loading="lazy"></div>
-          <div class="merch-info">
-            <span class="merch-name">Sticker Pack</span>
-            <span class="merch-price">$10</span>
-          </div>
-          <a href="#" class="list-link">buy</a>
-        </article>
-      </div>
+      <div class="merch-grid" id="merchGrid"></div>
     </div>
   </section>
 
@@ -180,8 +97,8 @@
     <div class="container booking-grid">
       <div class="booking-copy">
         <p class="section-label">05 — Bookings</p>
-        <p class="bio-text">Private gigs, clubs, and day parties. Send the details below and expect a reply within 48 hours.</p>
-        <a class="contact-email" href="mailto:booking@halisi.example">booking@halisi.example</a>
+        <p class="bio-text" id="bookingBlurb">Private gigs, clubs, and day parties. Send the details below and expect a reply within 48 hours.</p>
+        <a class="contact-email" id="bookingEmail" href="mailto:booking@halisi.example">booking@halisi.example</a>
       </div>
 
       <form class="booking-form" id="bookingForm" novalidate>
@@ -223,9 +140,9 @@
     <div class="container">
       <p class="section-label">06 — Socials</p>
       <div class="social-links">
-        <a href="#">Instagram</a>
-        <a href="#">SoundCloud</a>
-        <a href="#">Spotify</a>
+        <a href="#" id="socialInstagram">Instagram</a>
+        <a href="#" id="socialSoundcloud">SoundCloud</a>
+        <a href="#" id="socialSpotify">Spotify</a>
       </div>
     </div>
   </section>

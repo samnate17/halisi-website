@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Halisi Admin</title>
+<style>
+  :root {
+    --bg: #0b0b10;
+    --surface: #15151c;
+    --surface-2: #1c1c26;
+    --border: #2a2a36;
+    --text: #f2f1f7;
+    --text-dim: #9997a8;
+    --accent: #ff2e93;
+    --accent-2: #22e5ff;
+    --ok: #34d399;
+    --err: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 40px 24px 100px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--text-dim); font-size: 0.9rem; margin: 0 0 32px; }
+  h2 { font-size: 1.1rem; margin: 0 0 4px; }
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .hint { color: var(--text-dim); font-size: 0.82rem; margin: 0 0 16px; }
+  label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="email"], input[type="number"], input[type="password"], input[type="url"], textarea {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.92rem;
+    margin-bottom: 14px;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent-2); }
+  textarea { resize: vertical; min-height: 70px; }
+  .row { display: grid; gap: 12px; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .item-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    background: var(--surface-2);
+  }
+  .item-card img {
+    width: 48px; height: 48px; object-fit: cover; border-radius: 6px;
+    position: absolute; top: 16px; right: 56px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .btn:hover { border-color: var(--accent-2); }
+  .btn-primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #0b0b10;
+    border: none;
+  }
+  .btn-remove {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+  }
+  .btn-remove:hover { color: var(--err); }
+  .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .status { font-size: 0.85rem; margin-top: 12px; white-space: pre-wrap; }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .links a { color: var(--accent-2); text-decoration: none; font-size: 0.85rem; margin-right: 16px; }
+  .links a:hover { text-decoration: underline; }
+  .gate {
+    max-width: 480px;
+    margin: 80px auto;
+    text-align: center;
+  }
+  .gate .section { text-align: left; }
+  .warn {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: #fca5a5;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    margin-bottom: 16px;
+  }
+  .hidden { display: none !important; }
+  .spinner { opacity: 0.6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div id="gate" class="gate">
+    <h1>Halisi Admin</h1>
+    <p class="sub">Paste your GitHub access token to connect.</p>
+    <div class="section">
+      <div class="warn">This token grants write access to both site repos. Use a <strong>fine-grained token</strong> scoped only to halisi-website and halisi-website-neon with Contents: Read and write — never a token with full account access. Keep this page's URL and your token private.</div>
+      <label for="tokenInput">GitHub Access Token</label>
+      <input type="password" id="tokenInput" placeholder="github_pat_...">
+      <div class="actions">
+        <button class="btn btn-primary" id="connectBtn">Connect</button>
+      </div>
+      <p class="status" id="connectStatus"></p>
+    </div>
+  </div>
+
+  <div id="admin" class="hidden">
+    <div class="top-bar">
+      <div>
+        <h1>Halisi Admin</h1>
+        <p class="sub" style="margin:0">Edits save to both site repos and go live in ~1 minute.</p>
+      </div>
+      <button class="btn" id="disconnectBtn">Disconnect</button>
+    </div>
+
+    <div class="links">
+      <a href="https://samnate17.github.io/halisi-website/" target="_blank">View minimal site &rarr;</a>
+      <a href="https://samnate17.github.io/halisi-website-neon/" target="_blank">View neon site &rarr;</a>
+    </div>
+
+    <p class="hint" id="loadStatus">Loading current content…</p>
+
+    <form id="contentForm">
+
+      <div class="section">
+        <h2>Bio</h2>
+        <p class="hint">The short line under the DJ name, the about paragraph, and years active.</p>
+        <label for="bioTagline">Tagline</label>
+        <input type="text" id="bioTagline">
+        <label for="bioText">Bio text</label>
+        <textarea id="bioText"></textarea>
+        <label for="bioYears">Years active</label>
+        <input type="number" id="bioYears" min="0" style="max-width:120px">
+      </div>
+
+      <div class="section">
+        <h2>Mixes</h2>
+        <p class="hint">Shown in the Listen / Mixes section.</p>
+        <div id="mixesItems"></div>
+        <button type="button" class="btn" data-add="mixes">+ Add mix</button>
+      </div>
+
+      <div class="section">
+        <h2>Live / Events</h2>
+        <p class="hint">Upcoming shows list.</p>
+        <div id="eventsItems"></div>
+        <button type="button" class="btn" data-add="events">+ Add event</button>
+      </div>
+
+      <div class="section">
+        <h2>Merch</h2>
+        <p class="hint">Product name, price, image URL, and buy link (point this at your store checkout once you have one).</p>
+        <div id="merchItems"></div>
+        <button type="button" class="btn" data-add="merch">+ Add product</button>
+      </div>
+
+      <div class="section">
+        <h2>Booking</h2>
+        <label for="bookingBlurb">Booking blurb</label>
+        <textarea id="bookingBlurb"></textarea>
+        <label for="bookingEmail">Booking email</label>
+        <input type="email" id="bookingEmail">
+      </div>
+
+      <div class="section">
+        <h2>Socials</h2>
+        <div class="row row-2">
+          <div>
+            <label for="socialInstagramHandle">Instagram handle (display text)</label>
+            <input type="text" id="socialInstagramHandle">
+          </div>
+          <div>
+            <label for="socialInstagramUrl">Instagram URL</label>
+            <input type="url" id="socialInstagramUrl">
+          </div>
+        </div>
+        <div class="row row-2">
+          <div>
+            <label for="socialSoundcloudUrl">SoundCloud URL</label>
+            <input type="url" id="socialSoundcloudUrl">
+          </div>
+          <div>
+            <label for="socialSpotifyUrl">Spotify URL</label>
+            <input type="url" id="socialSpotifyUrl">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="saveBtn">Save &amp; Publish</button>
+        </div>
+        <p class="status" id="saveStatus"></p>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+const OWNER = 'samnate17';
+const REPOS = ['halisi-website', 'halisi-website-neon'];
+const FILE_PATH = 'content.json';
+const TOKEN_KEY = 'halisi-admin-token';
+
+const gate = document.getElementById('gate');
+const adminEl = document.getElementById('admin');
+const tokenInput = document.getElementById('tokenInput');
+const connectBtn = document.getElementById('connectBtn');
+const connectStatus = document.getElementById('connectStatus');
+const disconnectBtn = document.getElementById('disconnectBtn');
+const loadStatus = document.getElementById('loadStatus');
+const contentForm = document.getElementById('contentForm');
+const saveStatus = document.getElementById('saveStatus');
+
+let shaByRepo = {};
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || '';
+}
+function setToken(t) {
+  localStorage.setItem(TOKEN_KEY, t);
+}
+function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
+
+async function ghGet(repo) {
+  const res = await fetch(`https://api.github.com/repos/${OWNER}/${repo}/contents/${FILE_PATH}`, {
+    headers: {
+      'Authorization': `Bearer ${getToken()}`,
+      'Accept': 'application/vnd.github+json'
+    }
+  });
+  if (!res.ok) throw new Error(`${repo}: GET failed (${res.status} ${res.statusText})`);
+  const json = await res.json();
+  shaByRepo[repo] = json.sha;
+  return JSON.parse(b64DecodeUnicode(json.content));
+}
+
+async function ghPut(repo, data) {
+  const res = await fetch(`https://api.github.com/repos/${OWNER}/${repo}/contents/${FILE_PATH}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${getToken()}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Update content.json via admin panel',
+      content: b64EncodeUnicode(JSON.stringify(data, null, 2) + '\n'),
+      sha: shaByRepo[repo],
+      branch: 'main'
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`${repo}: save failed (${res.status}) ${err.message || res.statusText}`);
+  }
+  const json = await res.json();
+  shaByRepo[repo] = json.content.sha;
+}
+
+// ---- Repeatable item rows ----
+
+const FIELD_DEFS = {
+  mixes: [
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'genre', label: 'Genre', type: 'text' },
+    { key: 'duration', label: 'Duration', type: 'text' }
+  ],
+  events: [
+    { key: 'day', label: 'Day', type: 'text' },
+    { key: 'month', label: 'Month', type: 'text' },
+    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'venue', label: 'Venue', type: 'text' },
+    { key: 'ticketUrl', label: 'Ticket URL', type: 'url' }
+  ],
+  merch: [
+    { key: 'name', label: 'Name', type: 'text' },
+    { key: 'price', label: 'Price', type: 'text' },
+    { key: 'imageUrl', label: 'Image URL', type: 'url' },
+    { key: 'buyUrl', label: 'Buy URL', type: 'url' }
+  ]
+};
+
+function addItemRow(listKey, values = {}) {
+  const container = document.getElementById(`${listKey}Items`);
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.dataset.list = listKey;
+
+  const fields = FIELD_DEFS[listKey];
+  const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : 'row-2';
+  card.innerHTML = `
+    <div class="row ${rowClass}">
+      ${fields.map(f => `
+        <div>
+          <label>${f.label}</label>
+          <input type="${f.type}" data-field="${f.key}" value="${(values[f.key] ?? '').toString().replace(/"/g, '&quot;')}">
+        </div>
+      `).join('')}
+    </div>
+    <button type="button" class="btn-remove" title="Remove">&times;</button>
+  `;
+  card.querySelector('.btn-remove').addEventListener('click', () => card.remove());
+  container.appendChild(card);
+}
+
+document.querySelectorAll('[data-add]').forEach((btn) => {
+  btn.addEventListener('click', () => addItemRow(btn.dataset.add));
+});
+
+function readItemRows(listKey) {
+  const container = document.getElementById(`${listKey}Items`);
+  return Array.from(container.querySelectorAll('.item-card')).map((card) => {
+    const obj = {};
+    card.querySelectorAll('[data-field]').forEach((input) => {
+      obj[input.dataset.field] = input.value;
+    });
+    return obj;
+  });
+}
+
+// ---- Form <-> data ----
+
+function populateForm(data) {
+  document.getElementById('bioTagline').value = data.bio?.tagline || '';
+  document.getElementById('bioText').value = data.bio?.text || '';
+  document.getElementById('bioYears').value = data.bio?.yearsActive ?? '';
+
+  ['mixes', 'events', 'merch'].forEach((key) => {
+    document.getElementById(`${key}Items`).innerHTML = '';
+    (data[key] || []).forEach((item) => addItemRow(key, item));
+  });
+
+  document.getElementById('bookingBlurb').value = data.booking?.blurb || '';
+  document.getElementById('bookingEmail').value = data.booking?.email || '';
+
+  document.getElementById('socialInstagramHandle').value = data.socials?.instagramHandle || '';
+  document.getElementById('socialInstagramUrl').value = data.socials?.instagramUrl || '';
+  document.getElementById('socialSoundcloudUrl').value = data.socials?.soundcloudUrl || '';
+  document.getElementById('socialSpotifyUrl').value = data.socials?.spotifyUrl || '';
+}
+
+function readForm() {
+  return {
+    bio: {
+      tagline: document.getElementById('bioTagline').value,
+      text: document.getElementById('bioText').value,
+      yearsActive: Number(document.getElementById('bioYears').value) || 0
+    },
+    mixes: readItemRows('mixes'),
+    events: readItemRows('events'),
+    merch: readItemRows('merch'),
+    booking: {
+      blurb: document.getElementById('bookingBlurb').value,
+      email: document.getElementById('bookingEmail').value
+    },
+    socials: {
+      instagramHandle: document.getElementById('socialInstagramHandle').value,
+      instagramUrl: document.getElementById('socialInstagramUrl').value,
+      soundcloudUrl: document.getElementById('socialSoundcloudUrl').value,
+      spotifyUrl: document.getElementById('socialSpotifyUrl').value
+    }
+  };
+}
+
+// ---- Connect / load ----
+
+async function connectAndLoad() {
+  loadStatus.textContent = 'Loading current content…';
+  loadStatus.className = 'hint';
+  try {
+    const data = await ghGet(REPOS[0]);
+    await ghGet(REPOS[1]); // also fetch sha for the second repo
+    populateForm(data);
+    loadStatus.textContent = 'Loaded. Editing both repos together — Save & Publish writes to both.';
+  } catch (err) {
+    loadStatus.textContent = 'Could not load content: ' + err.message;
+    loadStatus.className = 'status err';
+  }
+}
+
+connectBtn.addEventListener('click', async () => {
+  const token = tokenInput.value.trim();
+  if (!token) {
+    connectStatus.textContent = 'Paste a token first.';
+    connectStatus.className = 'status err';
+    return;
+  }
+  setToken(token);
+  connectStatus.textContent = 'Connecting…';
+  connectStatus.className = 'status';
+  try {
+    await ghGet(REPOS[0]);
+    gate.classList.add('hidden');
+    adminEl.classList.remove('hidden');
+    connectAndLoad();
+  } catch (err) {
+    connectStatus.textContent = 'Connection failed: ' + err.message;
+    connectStatus.className = 'status err';
+    clearToken();
+  }
+});
+
+disconnectBtn.addEventListener('click', () => {
+  clearToken();
+  adminEl.classList.add('hidden');
+  gate.classList.remove('hidden');
+  tokenInput.value = '';
+});
+
+contentForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  saveStatus.textContent = 'Saving…';
+  saveStatus.className = 'status';
+  const data = readForm();
+  const results = [];
+  for (const repo of REPOS) {
+    try {
+      await ghPut(repo, data);
+      results.push(`${repo}: saved`);
+    } catch (err) {
+      results.push(`${repo}: ${err.message}`);
+    }
+  }
+  const allOk = results.every((r) => r.endsWith(': saved'));
+  saveStatus.textContent = results.join('\n') + (allOk ? '\n\nLive in ~1 minute.' : '');
+  saveStatus.className = 'status ' + (allOk ? 'ok' : 'err');
+});
+
+// Auto-connect if a token is already stored
+if (getToken()) {
+  gate.classList.add('hidden');
+  adminEl.classList.remove('hidden');
+  connectAndLoad();
+}
+</script>
+</body>
+</html>
