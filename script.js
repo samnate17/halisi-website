@@ -49,6 +49,12 @@ function escapeHtml(str) {
 }
 
 function renderContent(data) {
+  const root = document.documentElement.style;
+  if (data.design?.fontHeading) root.setProperty('--font-heading', `'${data.design.fontHeading}', sans-serif`);
+  if (data.design?.fontBody) root.setProperty('--font-body', `'${data.design.fontBody}', sans-serif`);
+  if (data.design?.accentColor) root.setProperty('--accent', data.design.accentColor);
+  if (data.design?.accentColor2) root.setProperty('--accent-2', data.design.accentColor2);
+
   const heroVideoSource = document.getElementById('heroVideoSource');
   const heroVideo = document.getElementById('heroVideo');
   if (heroVideoSource && data.media?.heroVideoUrl && heroVideoSource.src !== data.media.heroVideoUrl) {

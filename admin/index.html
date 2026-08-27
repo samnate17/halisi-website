@@ -232,6 +232,17 @@
     text-decoration: underline;
   }
   .btn-link:hover { color: var(--text); }
+  .color-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .color-row input[type="color"] {
+    width: 42px; height: 38px;
+    padding: 2px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .color-row input[type="text"] { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -287,6 +298,53 @@
     </div>
 
     <form id="contentForm">
+
+      <div class="section">
+        <div class="top-bar" style="margin-bottom:8px">
+          <h2 style="margin:0">Design</h2>
+          <button type="button" class="btn" id="resetDesignBtn">Reset to defaults</button>
+        </div>
+        <p class="hint">Fonts and accent colors, applied across both sites. Accent Color 2 mainly affects the neon site's gradient/glow effects.</p>
+        <div class="row row-2">
+          <div>
+            <label for="fontHeading">Heading font</label>
+            <select id="fontHeading">
+              <option value="Space Grotesk">Space Grotesk (default)</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Archivo Black">Archivo Black</option>
+              <option value="DM Serif Display">DM Serif Display</option>
+              <option value="Bebas Neue">Bebas Neue</option>
+              <option value="Syne">Syne</option>
+            </select>
+          </div>
+          <div>
+            <label for="fontBody">Body font</label>
+            <select id="fontBody">
+              <option value="Inter">Inter (default)</option>
+              <option value="Work Sans">Work Sans</option>
+              <option value="IBM Plex Sans">IBM Plex Sans</option>
+              <option value="Manrope">Manrope</option>
+              <option value="Source Sans 3">Source Sans 3</option>
+            </select>
+          </div>
+        </div>
+        <div class="row row-2">
+          <div>
+            <label for="accentColor">Accent color</label>
+            <div class="color-row">
+              <input type="color" id="accentColorPicker" value="#ff2e93">
+              <input type="text" id="accentColor" placeholder="#ff2e93 (leave empty for default)">
+            </div>
+          </div>
+          <div>
+            <label for="accentColor2">Accent color 2</label>
+            <div class="color-row">
+              <input type="color" id="accentColor2Picker" value="#22e5ff">
+              <input type="text" id="accentColor2" placeholder="#22e5ff (leave empty for default)">
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="section">
         <h2>Homepage Media</h2>
@@ -808,7 +866,48 @@ renderMediaFields();
 
 // ---- Form <-> data ----
 
+// ---- Design (fonts + colors) ----
+
+function syncColorPair(pickerId, textId) {
+  const picker = document.getElementById(pickerId);
+  const text = document.getElementById(textId);
+  picker.addEventListener('input', () => { text.value = picker.value; scheduleRefreshPreviews(); });
+  text.addEventListener('input', () => {
+    if (/^#[0-9a-fA-F]{6}$/.test(text.value)) picker.value = text.value;
+    scheduleRefreshPreviews();
+  });
+}
+syncColorPair('accentColorPicker', 'accentColor');
+syncColorPair('accentColor2Picker', 'accentColor2');
+
+document.getElementById('resetDesignBtn').addEventListener('click', () => {
+  populateDesignFields({});
+  scheduleRefreshPreviews();
+});
+
+function populateDesignFields(design = {}) {
+  document.getElementById('fontHeading').value = design.fontHeading || 'Space Grotesk';
+  document.getElementById('fontBody').value = design.fontBody || 'Inter';
+  document.getElementById('accentColor').value = design.accentColor || '';
+  document.getElementById('accentColorPicker').value = design.accentColor || '#ff2e93';
+  document.getElementById('accentColor2').value = design.accentColor2 || '';
+  document.getElementById('accentColor2Picker').value = design.accentColor2 || '#22e5ff';
+}
+
+function readDesignFields() {
+  return {
+    fontHeading: document.getElementById('fontHeading').value,
+    fontBody: document.getElementById('fontBody').value,
+    accentColor: document.getElementById('accentColor').value,
+    accentColor2: document.getElementById('accentColor2').value
+  };
+}
+
+document.getElementById('fontHeading').addEventListener('change', scheduleRefreshPreviews);
+document.getElementById('fontBody').addEventListener('change', scheduleRefreshPreviews);
+
 function populateForm(data) {
+  populateDesignFields(data.design);
   populateMediaFields(data.media);
 
   document.getElementById('bioTagline').value = data.bio?.tagline || '';
@@ -833,6 +932,7 @@ function populateForm(data) {
 
 function readForm() {
   return {
+    design: readDesignFields(),
     media: readMediaFields(),
     bio: {
       tagline: document.getElementById('bioTagline').value,

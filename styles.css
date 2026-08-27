@@ -4,6 +4,8 @@
   --text-dim: #a2a2a2;
   --line: #2a2a2a;
   --max-w: 1100px;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 :root[data-theme="light"] {
@@ -20,7 +22,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.25s ease, color 0.25s ease;
@@ -38,7 +40,7 @@ img { max-width: 100%; display: block; }
   color: var(--text-dim);
   padding: 0;
 }
-.theme-toggle:hover { color: var(--text); }
+.theme-toggle:hover { color: var(--accent, var(--text)); }
 
 @media (prefers-reduced-motion: no-preference) {
   .reveal {
@@ -53,7 +55,7 @@ img { max-width: 100%; display: block; }
 }
 
 h1, h2, h3, .logo, .hero-title {
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-family: var(--font-heading);
   margin: 0;
 }
 
@@ -111,7 +113,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-dim);
   transition: color 0.15s ease;
 }
-.nav-links a:hover { color: var(--text); }
+.nav-links a:hover { color: var(--accent, var(--text)); }
 
 .nav-toggle {
   display: none;
@@ -268,7 +270,7 @@ section:not(.hero) {
   margin-top: 44px;
 }
 .bio-stats div { display: flex; flex-direction: column; gap: 4px; }
-.bio-stats strong { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; }
+.bio-stats strong { font-family: var(--font-heading); font-size: 1.7rem; font-weight: 700; color: var(--accent, var(--text)); }
 .bio-stats span { font-size: 0.78rem; letter-spacing: 0.04em; color: var(--text-dim); }
 
 /* Lists (mixes + events) */
@@ -304,7 +306,7 @@ section:not(.hero) {
 }
 
 .list-date {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.95rem;
   color: var(--text-dim);
   width: 60px;
@@ -318,7 +320,7 @@ section:not(.hero) {
   color: var(--text-dim);
   justify-self: end;
 }
-.list-link:hover { color: var(--text); }
+.list-link:hover { color: var(--accent, var(--text)); }
 
 .play-dot {
   width: 9px; height: 9px;
@@ -330,8 +332,8 @@ section:not(.hero) {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .list-row.playing .play-dot {
-  background: var(--text);
-  border-color: var(--text);
+  background: var(--accent, var(--text));
+  border-color: var(--accent, var(--text));
 }
 
 .mixes .list-row {
@@ -434,7 +436,7 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--text);
+  border-color: var(--accent, var(--text));
 }
 select { cursor: pointer; }
 select option { background: var(--bg); }
@@ -467,12 +469,13 @@ select option { background: var(--bg); }
 }
 .social-links a {
   font-size: 1.3rem;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .social-links a:hover {
-  border-color: var(--text);
+  border-color: var(--accent, var(--text));
+  color: var(--accent, var(--text));
 }
 
 /* Footer */
