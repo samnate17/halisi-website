@@ -60,6 +60,21 @@ function renderContent(data) {
   const pressPhoto = document.getElementById('pressPhoto');
   if (pressPhoto && data.media?.pressPhotoUrl) pressPhoto.src = data.media.pressPhotoUrl;
 
+  const logoUrl = data.media?.logoUrl;
+  document.querySelectorAll('.logo').forEach((el) => {
+    const img = el.querySelector('.logo-img');
+    const text = el.querySelector('.logo-text');
+    if (!img) return;
+    if (logoUrl) {
+      img.src = logoUrl;
+      img.classList.add('visible');
+      text?.classList.add('hidden');
+    } else {
+      img.classList.remove('visible');
+      text?.classList.remove('hidden');
+    }
+  });
+
   const heroTagline = document.getElementById('heroTagline');
   if (heroTagline && data.bio?.tagline) heroTagline.textContent = data.bio.tagline;
 
@@ -77,6 +92,7 @@ function renderContent(data) {
         <span class="list-title">${escapeHtml(mix.title)}</span>
         <span class="list-meta">${escapeHtml(mix.genre)}</span>
         <span class="list-meta">${escapeHtml(mix.duration)}</span>
+        <a href="${escapeHtml(mix.listenUrl || '#')}" class="list-link" target="_blank" rel="noopener">listen</a>
       </article>
     `).join('');
   }
@@ -127,6 +143,9 @@ function renderContent(data) {
 
   const socialMixcloud = document.getElementById('socialMixcloud');
   if (socialMixcloud && data.socials?.mixcloudUrl) socialMixcloud.href = data.socials.mixcloudUrl;
+
+  const socialSoundcloud = document.getElementById('socialSoundcloud');
+  if (socialSoundcloud && data.socials?.soundcloudUrl) socialSoundcloud.href = data.socials.soundcloudUrl;
 
   wireMixRows();
 }
