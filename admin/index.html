@@ -144,6 +144,51 @@
     border: none;
     display: block;
   }
+  .media-field { margin-bottom: 24px; }
+  .media-field:last-child { margin-bottom: 0; }
+  .media-field-label { font-weight: 600; font-size: 0.92rem; margin-bottom: 4px; color: var(--text); }
+  .media-field .hint { margin: 0 0 10px; }
+  .media-field-row { display: flex; gap: 14px; align-items: flex-start; }
+  .media-preview {
+    width: 84px; height: 84px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    text-align: center;
+  }
+  .media-preview img, .media-preview video { width: 100%; height: 100%; object-fit: cover; }
+  .media-field-controls { flex: 1; min-width: 0; }
+  .media-field-controls input[type="url"] { margin-bottom: 8px; }
+  .upload-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .file-btn:hover { border-color: var(--accent-2); }
+  .upload-status { font-size: 0.78rem; color: var(--text-dim); }
+  .upload-status.ok { color: var(--ok); }
+  .upload-status.err { color: var(--err); }
+  .merch-upload-row { display: flex; align-items: center; gap: 10px; margin-top: -4px; margin-bottom: 14px; }
+  .merch-thumb {
+    width: 40px; height: 40px; border-radius: 6px; object-fit: cover;
+    border: 1px solid var(--border); background: var(--surface);
+  }
 </style>
 </head>
 <body>
@@ -201,6 +246,12 @@
     <form id="contentForm">
 
       <div class="section">
+        <h2>Homepage Media</h2>
+        <p class="hint">Upload files directly, or paste a URL. Uploaded files are stored in the halisi-website repo under /uploads and used by both sites.</p>
+        <div id="mediaFields"></div>
+      </div>
+
+      <div class="section">
         <h2>Bio</h2>
         <p class="hint">The short line under the DJ name, the about paragraph, and years active.</p>
         <label for="bioTagline">Tagline</label>
@@ -242,6 +293,9 @@
 
       <div class="section">
         <h2>Socials</h2>
+        <p class="hint">Order shown on the site: YouTube, Instagram, Facebook, Mixcloud.</p>
+        <label for="socialYoutubeUrl">YouTube URL</label>
+        <input type="url" id="socialYoutubeUrl">
         <div class="row row-2">
           <div>
             <label for="socialInstagramHandle">Instagram handle (display text)</label>
@@ -254,8 +308,8 @@
         </div>
         <div class="row row-2">
           <div>
-            <label for="socialSoundcloudUrl">SoundCloud URL</label>
-            <input type="url" id="socialSoundcloudUrl">
+            <label for="socialFacebookUrl">Facebook URL</label>
+            <input type="url" id="socialFacebookUrl">
           </div>
           <div>
             <label for="socialMixcloudUrl">Mixcloud URL</label>
@@ -347,6 +401,76 @@ async function ghPut(repo, data) {
   shaByRepo[repo] = json.content.sha;
 }
 
+// ---- File uploads (Git Data API — supports files well over the 1MB Contents API limit) ----
+
+const UPLOAD_REPO = REPOS[0]; // uploads live in halisi-website/uploads and are referenced by absolute URL from both sites
+const MAX_UPLOAD_MB = 50;
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function makeUploadPath(file) {
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  return `uploads/${Date.now()}-${safeName || 'file'}`;
+}
+
+async function ghUploadFile(file, onProgressLabel) {
+  if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+    throw new Error(`File is ${(file.size / 1024 / 1024).toFixed(1)}MB — please keep uploads under ${MAX_UPLOAD_MB}MB`);
+  }
+  const token = getToken();
+  const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' };
+  const jsonHeaders = { ...headers, 'Content-Type': 'application/json' };
+  const path = makeUploadPath(file);
+
+  onProgressLabel?.('Reading file…');
+  const base64 = await fileToBase64(file);
+
+  onProgressLabel?.('Uploading to GitHub…');
+  const blobRes = await fetch(`https://api.github.com/repos/${OWNER}/${UPLOAD_REPO}/git/blobs`, {
+    method: 'POST', headers: jsonHeaders, body: JSON.stringify({ content: base64, encoding: 'base64' })
+  });
+  if (!blobRes.ok) throw new Error(`Blob upload failed (${blobRes.status})`);
+  const blob = await blobRes.json();
+
+  const refRes = await fetch(`https://api.github.com/repos/${OWNER}/${UPLOAD_REPO}/git/ref/heads/main`, { headers });
+  if (!refRes.ok) throw new Error(`Could not read repo ref (${refRes.status})`);
+  const ref = await refRes.json();
+  const parentCommitSha = ref.object.sha;
+
+  const commitRes = await fetch(`https://api.github.com/repos/${OWNER}/${UPLOAD_REPO}/git/commits/${parentCommitSha}`, { headers });
+  if (!commitRes.ok) throw new Error(`Could not read base commit (${commitRes.status})`);
+  const baseCommit = await commitRes.json();
+
+  onProgressLabel?.('Committing…');
+  const treeRes = await fetch(`https://api.github.com/repos/${OWNER}/${UPLOAD_REPO}/git/trees`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: [{ path, mode: '100644', type: 'blob', sha: blob.sha }] })
+  });
+  if (!treeRes.ok) throw new Error(`Tree create failed (${treeRes.status})`);
+  const tree = await treeRes.json();
+
+  const newCommitRes = await fetch(`https://api.github.com/repos/${OWNER}/${UPLOAD_REPO}/git/commits`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ message: `Upload ${path} via admin panel`, tree: tree.sha, parents: [parentCommitSha] })
+  });
+  if (!newCommitRes.ok) throw new Error(`Commit create failed (${newCommitRes.status})`);
+  const newCommit = await newCommitRes.json();
+
+  const updateRefRes = await fetch(`https://api.github.com/repos/${OWNER}/${UPLOAD_REPO}/git/refs/heads/main`, {
+    method: 'PATCH', headers: jsonHeaders, body: JSON.stringify({ sha: newCommit.sha })
+  });
+  if (!updateRefRes.ok) throw new Error(`Branch update failed (${updateRefRes.status})`);
+
+  return `https://samnate17.github.io/${UPLOAD_REPO}/${path}`;
+}
+
 // ---- Repeatable item rows ----
 
 const FIELD_DEFS = {
@@ -378,7 +502,18 @@ function addItemRow(listKey, values = {}) {
 
   const fields = FIELD_DEFS[listKey];
   const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : 'row-2';
+  const isMerch = listKey === 'merch';
   card.innerHTML = `
+    ${isMerch ? `
+      <div class="merch-upload-row">
+        <img class="merch-thumb" data-thumb-for="imageUrl" src="${(values.imageUrl ?? '').toString().replace(/"/g, '&quot;')}" alt="">
+        <label class="file-btn">
+          Upload photo
+          <input type="file" accept="image/*" class="file-input" data-upload-target="imageUrl" hidden>
+        </label>
+        <span class="upload-status" data-status-for="imageUrl"></span>
+      </div>
+    ` : ''}
     <div class="row ${rowClass}">
       ${fields.map(f => `
         <div>
@@ -393,6 +528,35 @@ function addItemRow(listKey, values = {}) {
     card.remove();
     scheduleRefreshPreviews();
   });
+
+  if (isMerch) {
+    const imageUrlInput = card.querySelector('[data-field="imageUrl"]');
+    const thumb = card.querySelector('[data-thumb-for="imageUrl"]');
+    const fileInput = card.querySelector('[data-upload-target="imageUrl"]');
+    const statusEl = card.querySelector('[data-status-for="imageUrl"]');
+
+    imageUrlInput.addEventListener('input', () => { thumb.src = imageUrlInput.value; });
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Uploading…';
+      statusEl.className = 'upload-status';
+      try {
+        const url = await ghUploadFile(file, (msg) => { statusEl.textContent = msg; });
+        imageUrlInput.value = url;
+        thumb.src = url;
+        statusEl.textContent = 'Uploaded ✓';
+        statusEl.className = 'upload-status ok';
+        scheduleRefreshPreviews();
+      } catch (err) {
+        statusEl.textContent = err.message;
+        statusEl.className = 'upload-status err';
+      }
+      fileInput.value = '';
+    });
+  }
+
   container.appendChild(card);
 }
 
@@ -414,9 +578,95 @@ function readItemRows(listKey) {
   });
 }
 
+// ---- Homepage media fields ----
+
+const MEDIA_FIELDS = [
+  { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.' },
+  { key: 'heroPosterUrl', label: 'Hero poster / fallback image', kind: 'image', accept: 'image/*', hint: 'Shown while the video loads, and used as the background if video playback fails.' },
+  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.' }
+];
+
+function renderMediaFields() {
+  const container = document.getElementById('mediaFields');
+  container.innerHTML = MEDIA_FIELDS.map((f) => `
+    <div class="media-field" data-media-key="${f.key}">
+      <div class="media-field-label">${f.label}</div>
+      <p class="hint">${f.hint}</p>
+      <div class="media-field-row">
+        <div class="media-preview" data-preview-for="${f.key}"><span>no ${f.kind}</span></div>
+        <div class="media-field-controls">
+          <input type="url" id="${f.key}" placeholder="https://...">
+          <div class="upload-row">
+            <label class="file-btn">
+              Upload ${f.kind}
+              <input type="file" accept="${f.accept}" class="file-input" data-upload-target="${f.key}" hidden>
+            </label>
+            <span class="upload-status" data-status-for="${f.key}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  MEDIA_FIELDS.forEach((f) => {
+    const urlInput = document.getElementById(f.key);
+    const preview = container.querySelector(`[data-preview-for="${f.key}"]`);
+    const fileInput = container.querySelector(`[data-upload-target="${f.key}"]`);
+    const statusEl = container.querySelector(`[data-status-for="${f.key}"]`);
+
+    const updatePreview = () => { preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value); };
+    urlInput.addEventListener('input', updatePreview);
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Uploading…';
+      statusEl.className = 'upload-status';
+      try {
+        const url = await ghUploadFile(file, (msg) => { statusEl.textContent = msg; });
+        urlInput.value = url;
+        updatePreview();
+        statusEl.textContent = 'Uploaded ✓';
+        statusEl.className = 'upload-status ok';
+        scheduleRefreshPreviews();
+      } catch (err) {
+        statusEl.textContent = err.message;
+        statusEl.className = 'upload-status err';
+      }
+      fileInput.value = '';
+    });
+  });
+}
+
+function mediaPreviewMarkup(kind, url) {
+  if (!url) return `<span>no ${kind}</span>`;
+  return kind === 'video'
+    ? `<video src="${url.replace(/"/g, '&quot;')}" muted></video>`
+    : `<img src="${url.replace(/"/g, '&quot;')}" alt="">`;
+}
+
+function populateMediaFields(media = {}) {
+  MEDIA_FIELDS.forEach((f) => {
+    const urlInput = document.getElementById(f.key);
+    const preview = document.querySelector(`[data-preview-for="${f.key}"]`);
+    urlInput.value = media[f.key] || '';
+    preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
+  });
+}
+
+function readMediaFields() {
+  const media = {};
+  MEDIA_FIELDS.forEach((f) => { media[f.key] = document.getElementById(f.key).value; });
+  return media;
+}
+
+renderMediaFields();
+
 // ---- Form <-> data ----
 
 function populateForm(data) {
+  populateMediaFields(data.media);
+
   document.getElementById('bioTagline').value = data.bio?.tagline || '';
   document.getElementById('bioText').value = data.bio?.text || '';
   document.getElementById('bioYears').value = data.bio?.yearsActive ?? '';
@@ -429,14 +679,16 @@ function populateForm(data) {
   document.getElementById('bookingBlurb').value = data.booking?.blurb || '';
   document.getElementById('bookingEmail').value = data.booking?.email || '';
 
+  document.getElementById('socialYoutubeUrl').value = data.socials?.youtubeUrl || '';
   document.getElementById('socialInstagramHandle').value = data.socials?.instagramHandle || '';
   document.getElementById('socialInstagramUrl').value = data.socials?.instagramUrl || '';
-  document.getElementById('socialSoundcloudUrl').value = data.socials?.soundcloudUrl || '';
+  document.getElementById('socialFacebookUrl').value = data.socials?.facebookUrl || '';
   document.getElementById('socialMixcloudUrl').value = data.socials?.mixcloudUrl || '';
 }
 
 function readForm() {
   return {
+    media: readMediaFields(),
     bio: {
       tagline: document.getElementById('bioTagline').value,
       text: document.getElementById('bioText').value,
@@ -450,9 +702,10 @@ function readForm() {
       email: document.getElementById('bookingEmail').value
     },
     socials: {
+      youtubeUrl: document.getElementById('socialYoutubeUrl').value,
       instagramHandle: document.getElementById('socialInstagramHandle').value,
       instagramUrl: document.getElementById('socialInstagramUrl').value,
-      soundcloudUrl: document.getElementById('socialSoundcloudUrl').value,
+      facebookUrl: document.getElementById('socialFacebookUrl').value,
       mixcloudUrl: document.getElementById('socialMixcloudUrl').value
     }
   };

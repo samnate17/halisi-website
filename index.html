@@ -44,8 +44,8 @@
 
   <section class="hero" id="home">
     <div class="hero-media">
-      <video class="hero-photo" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1920&h=1200&fit=crop&auto=format">
-        <source src="https://assets.mixkit.co/videos/4026/4026-360.mp4" type="video/mp4">
+      <video class="hero-photo" id="heroVideo" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1920&h=1200&fit=crop&auto=format">
+        <source id="heroVideoSource" src="https://assets.mixkit.co/videos/4026/4026-360.mp4" type="video/mp4">
       </video>
     </div>
     <div class="container hero-inner">
@@ -59,7 +59,7 @@
     <div class="container bio-grid">
       <div class="bio-photo">
         <div class="photo-placeholder">
-          <img src="https://images.unsplash.com/photo-1772187727910-7d2facda0c21?q=80&w=600&h=750&fit=crop&auto=format" alt="Halisi press photo" loading="lazy">
+          <img id="pressPhoto" src="https://images.unsplash.com/photo-1772187727910-7d2facda0c21?q=80&w=600&h=750&fit=crop&auto=format" alt="Halisi press photo" loading="lazy">
         </div>
       </div>
       <div class="bio-copy">
@@ -140,8 +140,9 @@
     <div class="container">
       <p class="section-label">06 — Socials</p>
       <div class="social-links">
+        <a href="#" id="socialYoutube">YouTube</a>
         <a href="#" id="socialInstagram">Instagram</a>
-        <a href="#" id="socialSoundcloud">SoundCloud</a>
+        <a href="#" id="socialFacebook">Facebook</a>
         <a href="#" id="socialMixcloud">Mixcloud</a>
       </div>
     </div>

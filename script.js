@@ -49,6 +49,17 @@ function escapeHtml(str) {
 }
 
 function renderContent(data) {
+  const heroVideoSource = document.getElementById('heroVideoSource');
+  const heroVideo = document.getElementById('heroVideo');
+  if (heroVideoSource && data.media?.heroVideoUrl && heroVideoSource.src !== data.media.heroVideoUrl) {
+    heroVideoSource.src = data.media.heroVideoUrl;
+    if (heroVideo) heroVideo.load();
+  }
+  if (heroVideo && data.media?.heroPosterUrl) heroVideo.poster = data.media.heroPosterUrl;
+
+  const pressPhoto = document.getElementById('pressPhoto');
+  if (pressPhoto && data.media?.pressPhotoUrl) pressPhoto.src = data.media.pressPhotoUrl;
+
   const heroTagline = document.getElementById('heroTagline');
   if (heroTagline && data.bio?.tagline) heroTagline.textContent = data.bio.tagline;
 
@@ -105,11 +116,14 @@ function renderContent(data) {
     bookingEmail.href = `mailto:${data.booking.email}`;
   }
 
+  const socialYoutube = document.getElementById('socialYoutube');
+  if (socialYoutube && data.socials?.youtubeUrl) socialYoutube.href = data.socials.youtubeUrl;
+
   const socialInstagram = document.getElementById('socialInstagram');
   if (socialInstagram && data.socials?.instagramUrl) socialInstagram.href = data.socials.instagramUrl;
 
-  const socialSoundcloud = document.getElementById('socialSoundcloud');
-  if (socialSoundcloud && data.socials?.soundcloudUrl) socialSoundcloud.href = data.socials.soundcloudUrl;
+  const socialFacebook = document.getElementById('socialFacebook');
+  if (socialFacebook && data.socials?.facebookUrl) socialFacebook.href = data.socials.facebookUrl;
 
   const socialMixcloud = document.getElementById('socialMixcloud');
   if (socialMixcloud && data.socials?.mixcloudUrl) socialMixcloud.href = data.socials.mixcloudUrl;
