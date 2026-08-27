@@ -111,8 +111,8 @@ function renderContent(data) {
   const socialSoundcloud = document.getElementById('socialSoundcloud');
   if (socialSoundcloud && data.socials?.soundcloudUrl) socialSoundcloud.href = data.socials.soundcloudUrl;
 
-  const socialSpotify = document.getElementById('socialSpotify');
-  if (socialSpotify && data.socials?.spotifyUrl) socialSpotify.href = data.socials.spotifyUrl;
+  const socialMixcloud = document.getElementById('socialMixcloud');
+  if (socialMixcloud && data.socials?.mixcloudUrl) socialMixcloud.href = data.socials.mixcloudUrl;
 
   wireMixRows();
 }

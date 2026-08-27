@@ -130,6 +130,20 @@
   }
   .hidden { display: none !important; }
   .spinner { opacity: 0.6; }
+  .tabs { display: flex; gap: 8px; }
+  .tab-btn.active { border-color: var(--accent-2); color: var(--accent-2); }
+  .preview-frame-wrap {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+  }
+  .preview-frame-wrap iframe {
+    width: 100%;
+    height: 640px;
+    border: none;
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -165,6 +179,24 @@
     </div>
 
     <p class="hint" id="loadStatus">Loading current content…</p>
+
+    <div class="section">
+      <div class="top-bar" style="margin-bottom:8px">
+        <h2 style="margin:0">Live Preview</h2>
+        <div class="actions">
+          <div class="tabs">
+            <button type="button" class="btn tab-btn active" data-preview-tab="minimal">Minimal</button>
+            <button type="button" class="btn tab-btn" data-preview-tab="neon">Neon</button>
+          </div>
+          <button type="button" class="btn" id="refreshPreviewBtn">↻ Refresh</button>
+        </div>
+      </div>
+      <p class="hint">Renders your unsaved edits on the real site template, before you publish. Updates automatically as you type.</p>
+      <div class="preview-frame-wrap">
+        <iframe id="previewFrameMinimal" src="../index.html" title="Minimal site preview"></iframe>
+        <iframe id="previewFrameNeon" class="hidden" src="https://samnate17.github.io/halisi-website-neon/index.html" title="Neon site preview"></iframe>
+      </div>
+    </div>
 
     <form id="contentForm">
 
@@ -226,8 +258,8 @@
             <input type="url" id="socialSoundcloudUrl">
           </div>
           <div>
-            <label for="socialSpotifyUrl">Spotify URL</label>
-            <input type="url" id="socialSpotifyUrl">
+            <label for="socialMixcloudUrl">Mixcloud URL</label>
+            <input type="url" id="socialMixcloudUrl">
           </div>
         </div>
       </div>
@@ -357,12 +389,18 @@ function addItemRow(listKey, values = {}) {
     </div>
     <button type="button" class="btn-remove" title="Remove">&times;</button>
   `;
-  card.querySelector('.btn-remove').addEventListener('click', () => card.remove());
+  card.querySelector('.btn-remove').addEventListener('click', () => {
+    card.remove();
+    scheduleRefreshPreviews();
+  });
   container.appendChild(card);
 }
 
 document.querySelectorAll('[data-add]').forEach((btn) => {
-  btn.addEventListener('click', () => addItemRow(btn.dataset.add));
+  btn.addEventListener('click', () => {
+    addItemRow(btn.dataset.add);
+    scheduleRefreshPreviews();
+  });
 });
 
 function readItemRows(listKey) {
@@ -394,7 +432,7 @@ function populateForm(data) {
   document.getElementById('socialInstagramHandle').value = data.socials?.instagramHandle || '';
   document.getElementById('socialInstagramUrl').value = data.socials?.instagramUrl || '';
   document.getElementById('socialSoundcloudUrl').value = data.socials?.soundcloudUrl || '';
-  document.getElementById('socialSpotifyUrl').value = data.socials?.spotifyUrl || '';
+  document.getElementById('socialMixcloudUrl').value = data.socials?.mixcloudUrl || '';
 }
 
 function readForm() {
@@ -415,10 +453,66 @@ function readForm() {
       instagramHandle: document.getElementById('socialInstagramHandle').value,
       instagramUrl: document.getElementById('socialInstagramUrl').value,
       soundcloudUrl: document.getElementById('socialSoundcloudUrl').value,
-      spotifyUrl: document.getElementById('socialSpotifyUrl').value
+      mixcloudUrl: document.getElementById('socialMixcloudUrl').value
     }
   };
 }
+
+// ---- Live preview ----
+
+const previewFrames = {
+  minimal: document.getElementById('previewFrameMinimal'),
+  neon: document.getElementById('previewFrameNeon')
+};
+const previewReady = { minimal: false, neon: false };
+let activePreviewTab = 'minimal';
+
+Object.entries(previewFrames).forEach(([key, frame]) => {
+  frame.addEventListener('load', () => {
+    previewReady[key] = true;
+    applyPreview(key);
+  });
+});
+
+function applyPreview(key) {
+  if (!previewReady[key]) return;
+  try {
+    const win = previewFrames[key].contentWindow;
+    if (win && typeof win.renderContent === 'function') {
+      win.renderContent(readForm());
+    }
+  } catch (err) {
+    // Cross-origin frames (e.g. previewing the neon site from a local dev server)
+    // can't be reached from here — this only matters before the admin panel
+    // itself is deployed to the live samnate17.github.io origin.
+    console.warn(`Preview (${key}) could not be updated:`, err.message);
+  }
+}
+
+function refreshAllPreviews() {
+  applyPreview(activePreviewTab === 'minimal' ? 'minimal' : 'neon');
+}
+
+let previewDebounceTimer = null;
+function scheduleRefreshPreviews() {
+  clearTimeout(previewDebounceTimer);
+  previewDebounceTimer = setTimeout(refreshAllPreviews, 400);
+}
+
+document.getElementById('refreshPreviewBtn').addEventListener('click', refreshAllPreviews);
+contentForm.addEventListener('input', scheduleRefreshPreviews);
+
+document.querySelectorAll('[data-preview-tab]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-preview-tab]').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePreviewTab = btn.dataset.previewTab;
+    Object.entries(previewFrames).forEach(([key, frame]) => {
+      frame.classList.toggle('hidden', key !== activePreviewTab);
+    });
+    applyPreview(activePreviewTab);
+  });
+});
 
 // ---- Connect / load ----
 
@@ -430,6 +524,7 @@ async function connectAndLoad() {
     await ghGet(REPOS[1]); // also fetch sha for the second repo
     populateForm(data);
     loadStatus.textContent = 'Loaded. Editing both repos together — Save & Publish writes to both.';
+    refreshAllPreviews();
   } catch (err) {
     loadStatus.textContent = 'Could not load content: ' + err.message;
     loadStatus.className = 'status err';
