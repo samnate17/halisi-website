@@ -189,6 +189,49 @@
     width: 40px; height: 40px; border-radius: 6px; object-fit: cover;
     border: 1px solid var(--border); background: var(--surface);
   }
+  .focal-block { margin-top: 14px; }
+  .focal-picker {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: crosshair;
+  }
+  .focal-media { width: 100%; height: 100%; }
+  .focal-media img, .focal-media video {
+    width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
+  }
+  .focal-marker {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 22px; height: 22px;
+    transform: translate(-50%, -50%);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.6), 0 0 8px rgba(0,0,0,0.5);
+    pointer-events: none;
+  }
+  .focal-marker::before, .focal-marker::after {
+    content: '';
+    position: absolute;
+    background: #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,0.8);
+  }
+  .focal-marker::before { left: 50%; top: -6px; width: 2px; height: 6px; transform: translateX(-50%); }
+  .focal-marker::after { top: 50%; left: -6px; width: 6px; height: 2px; transform: translateY(-50%); }
+  .btn-link {
+    background: none;
+    border: none;
+    color: var(--accent-2);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 8px 0 0;
+    text-decoration: underline;
+  }
+  .btn-link:hover { color: var(--text); }
 </style>
 </head>
 <body>
@@ -585,9 +628,9 @@ function readItemRows(listKey) {
 
 const MEDIA_FIELDS = [
   { key: 'logoUrl', label: 'Logo', kind: 'image', accept: 'image/png,image/svg+xml,image/webp', hint: 'Shown in the header and footer instead of the text wordmark. A transparent PNG or SVG works best. Leave empty to keep the plain text logo.' },
-  { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.' },
+  { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.', positionKey: 'heroVideoPosition', previewAspect: '21 / 9' },
   { key: 'heroPosterUrl', label: 'Hero poster / fallback image', kind: 'image', accept: 'image/*', hint: 'Shown while the video loads, and used as the background if video playback fails.' },
-  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.' }
+  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.', positionKey: 'pressPhotoPosition', previewAspect: '4 / 5' }
 ];
 
 function renderMediaFields() {
@@ -609,6 +652,17 @@ function renderMediaFields() {
           </div>
         </div>
       </div>
+      ${f.positionKey ? `
+        <div class="focal-block">
+          <p class="hint">Click anywhere on the preview below to choose what stays in frame when this ${f.kind} is cropped to fill the screen.</p>
+          <input type="hidden" id="${f.positionKey}" value="50% 50%">
+          <div class="focal-picker" data-focal-for="${f.key}" style="aspect-ratio: ${f.previewAspect};">
+            <div class="focal-media" data-focal-media-for="${f.key}"></div>
+            <div class="focal-marker" data-focal-marker-for="${f.key}"></div>
+          </div>
+          <button type="button" class="btn-link" data-reset-focal="${f.key}">Reset to center</button>
+        </div>
+      ` : ''}
     </div>
   `).join('');
 
@@ -618,7 +672,10 @@ function renderMediaFields() {
     const fileInput = container.querySelector(`[data-upload-target="${f.key}"]`);
     const statusEl = container.querySelector(`[data-status-for="${f.key}"]`);
 
-    const updatePreview = () => { preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value); };
+    const updatePreview = () => {
+      preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
+      if (f.positionKey) updateFocalMedia(f);
+    };
     urlInput.addEventListener('input', updatePreview);
 
     fileInput.addEventListener('change', async () => {
@@ -639,7 +696,43 @@ function renderMediaFields() {
       }
       fileInput.value = '';
     });
+
+    if (f.positionKey) {
+      const picker = container.querySelector(`[data-focal-for="${f.key}"]`);
+      picker.addEventListener('click', (e) => {
+        const rect = picker.getBoundingClientRect();
+        const x = Math.round(Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)));
+        const y = Math.round(Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)));
+        setFocalPosition(f, `${x}% ${y}%`);
+        scheduleRefreshPreviews();
+      });
+      container.querySelector(`[data-reset-focal="${f.key}"]`).addEventListener('click', () => {
+        setFocalPosition(f, '50% 50%');
+        scheduleRefreshPreviews();
+      });
+    }
   });
+}
+
+function setFocalPosition(f, posStr) {
+  document.getElementById(f.positionKey).value = posStr;
+  const [xStr, yStr] = posStr.split(' ');
+  const marker = document.querySelector(`[data-focal-marker-for="${f.key}"]`);
+  const media = document.querySelector(`[data-focal-media-for="${f.key}"]`);
+  if (marker) { marker.style.left = xStr; marker.style.top = yStr; }
+  if (media) media.style.objectPosition = posStr;
+}
+
+function updateFocalMedia(f) {
+  const url = document.getElementById(f.key).value;
+  const holder = document.querySelector(`[data-focal-media-for="${f.key}"]`);
+  if (!holder) return;
+  const pos = document.getElementById(f.positionKey)?.value || '50% 50%';
+  holder.innerHTML = url
+    ? (f.kind === 'video'
+        ? `<video src="${url.replace(/"/g, '&quot;')}" muted style="object-position:${pos}"></video>`
+        : `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="object-position:${pos}">`)
+    : '';
 }
 
 function mediaPreviewMarkup(kind, url) {
@@ -655,12 +748,19 @@ function populateMediaFields(media = {}) {
     const preview = document.querySelector(`[data-preview-for="${f.key}"]`);
     urlInput.value = media[f.key] || '';
     preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
+    if (f.positionKey) {
+      setFocalPosition(f, media[f.positionKey] || '50% 50%');
+      updateFocalMedia(f);
+    }
   });
 }
 
 function readMediaFields() {
   const media = {};
-  MEDIA_FIELDS.forEach((f) => { media[f.key] = document.getElementById(f.key).value; });
+  MEDIA_FIELDS.forEach((f) => {
+    media[f.key] = document.getElementById(f.key).value;
+    if (f.positionKey) media[f.positionKey] = document.getElementById(f.positionKey).value;
+  });
   return media;
 }
 
