@@ -667,7 +667,7 @@ function readItemRows(listKey) {
 // ---- Homepage media fields ----
 
 const MEDIA_FIELDS = [
-  { key: 'logoUrl', label: 'Logo', kind: 'image', accept: 'image/png,image/svg+xml,image/webp', hint: 'Shown in the header and footer instead of the text wordmark. A transparent PNG or SVG works best. Leave empty to keep the plain text logo.' },
+  { key: 'logoUrl', label: 'Logo', kind: 'image', accept: 'image/png,image/svg+xml,image/webp', hint: 'Neon site only — shown in its header and footer instead of the text wordmark. A transparent PNG or SVG works best. Leave empty to keep the plain text logo. (The minimal site always uses the text wordmark.)' },
   { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.', positionKey: 'heroVideoPosition', previewAspect: '21 / 9' },
   { key: 'heroPosterUrl', label: 'Hero poster / fallback image', kind: 'image', accept: 'image/*', hint: 'Shown while the video loads, and used as the background if video playback fails.' },
   { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.', positionKey: 'pressPhotoPosition', previewAspect: '4 / 5' }
