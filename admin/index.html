@@ -559,6 +559,15 @@ function addItemRow(listKey, values = {}) {
         </label>
         <span class="upload-status" data-status-for="imageUrl"></span>
       </div>
+      <div class="focal-block">
+        <p class="hint">Click the preview to choose what stays in frame when this photo is cropped.</p>
+        <input type="hidden" data-field="imagePosition" value="${(values.imagePosition ?? '50% 50%').toString().replace(/"/g, '&quot;')}">
+        <div class="focal-picker" data-merch-focal style="aspect-ratio: 1 / 1; max-width: 220px;">
+          <div class="focal-media" data-merch-focal-media></div>
+          <div class="focal-marker" data-merch-focal-marker></div>
+        </div>
+        <button type="button" class="btn-link" data-merch-focal-reset>Reset to center</button>
+      </div>
     ` : ''}
     <div class="row ${rowClass}">
       ${fields.map(f => `
@@ -580,8 +589,36 @@ function addItemRow(listKey, values = {}) {
     const thumb = card.querySelector('[data-thumb-for="imageUrl"]');
     const fileInput = card.querySelector('[data-upload-target="imageUrl"]');
     const statusEl = card.querySelector('[data-status-for="imageUrl"]');
+    const posInput = card.querySelector('[data-field="imagePosition"]');
+    const picker = card.querySelector('[data-merch-focal]');
+    const marker = card.querySelector('[data-merch-focal-marker]');
+    const focalMedia = card.querySelector('[data-merch-focal-media]');
 
-    imageUrlInput.addEventListener('input', () => { thumb.src = imageUrlInput.value; });
+    const updateFocal = () => {
+      const url = imageUrlInput.value;
+      const pos = posInput.value || '50% 50%';
+      focalMedia.innerHTML = url ? `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="object-position:${pos}">` : '';
+      const [xStr, yStr] = pos.split(' ');
+      marker.style.left = xStr;
+      marker.style.top = yStr;
+    };
+
+    imageUrlInput.addEventListener('input', () => { thumb.src = imageUrlInput.value; updateFocal(); });
+
+    picker.addEventListener('click', (e) => {
+      const rect = picker.getBoundingClientRect();
+      const x = Math.round(Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)));
+      const y = Math.round(Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)));
+      posInput.value = `${x}% ${y}%`;
+      updateFocal();
+      scheduleRefreshPreviews();
+    });
+
+    card.querySelector('[data-merch-focal-reset]').addEventListener('click', () => {
+      posInput.value = '50% 50%';
+      updateFocal();
+      scheduleRefreshPreviews();
+    });
 
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files[0];
@@ -592,6 +629,7 @@ function addItemRow(listKey, values = {}) {
         const url = await ghUploadFile(file, (msg) => { statusEl.textContent = msg; });
         imageUrlInput.value = url;
         thumb.src = url;
+        updateFocal();
         statusEl.textContent = 'Uploaded ✓';
         statusEl.className = 'upload-status ok';
         scheduleRefreshPreviews();
@@ -601,6 +639,8 @@ function addItemRow(listKey, values = {}) {
       }
       fileInput.value = '';
     });
+
+    updateFocal();
   }
 
   container.appendChild(card);
