@@ -60,6 +60,7 @@
   input:focus, textarea:focus { outline: none; border-color: var(--accent-2); }
   textarea { resize: vertical; min-height: 70px; }
   .row { display: grid; gap: 12px; }
+  .row-1 { grid-template-columns: 1fr; max-width: 220px; }
   .row-2 { grid-template-columns: 1fr 1fr; }
   .row-3 { grid-template-columns: 1fr 1fr 1fr; }
   .row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
@@ -385,6 +386,13 @@
       </div>
 
       <div class="section">
+        <h2>Availability</h2>
+        <p class="hint">Mark dates you're already booked or unavailable — the calendar on the site shows these as booked and everything else as open. Clicking an open date on the site pre-fills the booking form's event date.</p>
+        <div id="unavailableDatesItems"></div>
+        <button type="button" class="btn" data-add="unavailableDates">+ Add unavailable date</button>
+      </div>
+
+      <div class="section">
         <h2>Booking</h2>
         <label for="bookingBlurb">Booking blurb</label>
         <textarea id="bookingBlurb"></textarea>
@@ -595,6 +603,9 @@ const FIELD_DEFS = {
     { key: 'price', label: 'Price', type: 'text' },
     { key: 'imageUrl', label: 'Image URL', type: 'url' },
     { key: 'buyUrl', label: 'Buy URL', type: 'url' }
+  ],
+  unavailableDates: [
+    { key: 'date', label: 'Date', type: 'date' }
   ]
 };
 
@@ -605,7 +616,7 @@ function addItemRow(listKey, values = {}) {
   card.dataset.list = listKey;
 
   const fields = FIELD_DEFS[listKey];
-  const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : 'row-2';
+  const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : fields.length === 2 ? 'row-2' : 'row-1';
   const isMerch = listKey === 'merch';
   card.innerHTML = `
     ${isMerch ? `
@@ -914,7 +925,7 @@ function populateForm(data) {
   document.getElementById('bioText').value = data.bio?.text || '';
   document.getElementById('bioYears').value = data.bio?.yearsActive ?? '';
 
-  ['mixes', 'events', 'merch'].forEach((key) => {
+  ['mixes', 'events', 'merch', 'unavailableDates'].forEach((key) => {
     document.getElementById(`${key}Items`).innerHTML = '';
     (data[key] || []).forEach((item) => addItemRow(key, item));
   });
@@ -942,6 +953,7 @@ function readForm() {
     mixes: readItemRows('mixes'),
     events: readItemRows('events'),
     merch: readItemRows('merch'),
+    unavailableDates: readItemRows('unavailableDates'),
     booking: {
       blurb: document.getElementById('bookingBlurb').value,
       email: document.getElementById('bookingEmail').value
