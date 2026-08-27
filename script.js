@@ -62,21 +62,6 @@ function renderContent(data) {
   if (pressPhoto && data.media?.pressPhotoUrl) pressPhoto.src = data.media.pressPhotoUrl;
   if (pressPhoto && data.media?.pressPhotoPosition) pressPhoto.style.objectPosition = data.media.pressPhotoPosition;
 
-  const logoUrl = data.media?.logoUrl;
-  document.querySelectorAll('.logo').forEach((el) => {
-    const img = el.querySelector('.logo-img');
-    const text = el.querySelector('.logo-text');
-    if (!img) return;
-    if (logoUrl) {
-      img.src = logoUrl;
-      img.classList.add('visible');
-      text?.classList.add('hidden');
-    } else {
-      img.classList.remove('visible');
-      text?.classList.remove('hidden');
-    }
-  });
-
   const heroTagline = document.getElementById('heroTagline');
   if (heroTagline && data.bio?.tagline) heroTagline.textContent = data.bio.tagline;
 
