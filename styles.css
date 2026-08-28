@@ -492,7 +492,7 @@ section:not(.hero) {
 }
 .cal-legend-item { display: flex; align-items: center; gap: 6px; }
 .cal-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-.cal-dot-open { background: var(--accent, var(--text)); }
+.cal-dot-open { background: transparent; border: 1px solid var(--text-dim); }
 .cal-dot-booked { background: #f87171; }
 
 .booking-form {
