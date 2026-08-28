@@ -292,6 +292,13 @@ section:not(.hero) {
   border-top: none;
   text-align: left;
 }
+.list-row.has-thumb { grid-template-columns: 48px auto 1fr auto auto; }
+.list-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
 .list-row:first-child { border-top: 1px solid var(--line); }
 
 .list-title {
@@ -470,9 +477,10 @@ section:not(.hero) {
 }
 .cal-open:hover { border-color: var(--accent, var(--text)); color: var(--accent, var(--text)); }
 .cal-booked {
-  color: var(--text-dim);
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
   text-decoration: line-through;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(248, 113, 113, 0.4);
   cursor: not-allowed;
 }
 .cal-legend {
@@ -485,7 +493,7 @@ section:not(.hero) {
 .cal-legend-item { display: flex; align-items: center; gap: 6px; }
 .cal-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .cal-dot-open { background: var(--accent, var(--text)); }
-.cal-dot-booked { background: var(--line); }
+.cal-dot-booked { background: #f87171; }
 
 .booking-form {
   display: flex;
