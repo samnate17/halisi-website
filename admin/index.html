@@ -865,8 +865,14 @@ const MEDIA_FIELDS = [
   { key: 'logoUrl', label: 'Logo', kind: 'image', accept: 'image/png,image/svg+xml,image/webp', hint: 'Neon site only — shown in its header and footer instead of the text wordmark. A transparent PNG or SVG works best. Leave empty to keep the plain text logo. (The minimal site always uses the text wordmark.)' },
   { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.', positionKey: 'heroVideoPosition', zoomKey: 'heroVideoZoom', previewAspect: '21 / 9' },
   { key: 'heroPosterUrl', label: 'Hero poster / fallback image', kind: 'image', accept: 'image/*', hint: 'Shown while the video loads, and used as the background if video playback fails.' },
-  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.', positionKey: 'pressPhotoPosition', zoomKey: 'pressPhotoZoom', previewAspect: '4 / 5' }
+  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.', positionKey: 'pressPhotoPosition', zoomKey: 'pressPhotoZoom', previewAspect: '4 / 5' },
+  { key: 'siteBackgroundUrl', label: 'Site-wide background', kind: 'auto', accept: 'image/*,video/mp4,video/webm', hint: 'Optional. Shown behind the entire site, all pages scroll over it — pick a photo or a short looping video. Leave empty for the plain background.', positionKey: 'siteBackgroundPosition', zoomKey: 'siteBackgroundZoom', overlayKey: 'siteBackgroundOverlay', previewAspect: '16 / 9' },
+  { key: 'homepageAudioUrl', label: 'Homepage background music', kind: 'audio', accept: 'audio/mpeg,audio/mp4,audio/ogg,audio/wav', hint: 'Optional. A looping audio track visitors can turn on from a speaker button on the homepage — it never plays automatically with sound (browsers block that). An MP3 works best.' }
 ];
+
+function isVideoUrl(url) {
+  return /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url || '');
+}
 
 function renderMediaFields() {
   const container = document.getElementById('mediaFields');
@@ -875,21 +881,22 @@ function renderMediaFields() {
       <div class="media-field-label">${f.label}</div>
       <p class="hint">${f.hint}</p>
       <div class="media-field-row">
-        <div class="media-preview" data-preview-for="${f.key}"><span>no ${f.kind}</span></div>
+        ${f.kind === 'audio' ? '' : `<div class="media-preview" data-preview-for="${f.key}"><span>no ${f.kind === 'auto' ? 'media' : f.kind}</span></div>`}
         <div class="media-field-controls">
           <input type="url" id="${f.key}" placeholder="https://...">
           <div class="upload-row">
             <label class="file-btn">
-              Upload ${f.kind}
+              Upload ${f.kind === 'auto' ? 'photo or video' : f.kind}
               <input type="file" accept="${f.accept}" class="file-input" data-upload-target="${f.key}" hidden>
             </label>
             <span class="upload-status" data-status-for="${f.key}"></span>
           </div>
+          ${f.kind === 'audio' ? `<audio controls style="width:100%;margin-top:10px;" data-audio-preview-for="${f.key}"></audio>` : ''}
         </div>
       </div>
       ${f.positionKey ? `
         <div class="focal-block">
-          <p class="hint">Click anywhere on the preview below to choose what stays in frame when this ${f.kind} is cropped to fill the screen. Use the slider to zoom in or out.</p>
+          <p class="hint">Click anywhere on the preview below to choose what stays in frame when this is cropped to fill the screen. Use the slider to zoom in or out.</p>
           <input type="hidden" id="${f.positionKey}" value="50% 50%">
           <input type="hidden" id="${f.zoomKey}" value="1">
           <div class="focal-picker" data-focal-for="${f.key}" style="aspect-ratio: ${f.previewAspect};">
@@ -904,17 +911,30 @@ function renderMediaFields() {
           <button type="button" class="btn-link" data-reset-focal="${f.key}">Reset to center</button>
         </div>
       ` : ''}
+      ${f.overlayKey ? `
+        <div class="zoom-row">
+          <span>Darken for readability</span>
+          <input type="hidden" id="${f.overlayKey}" value="0.55">
+          <input type="range" min="0" max="0.9" step="0.05" value="0.55" data-overlay-for="${f.key}" style="max-width: 220px;">
+          <span data-overlay-label-for="${f.key}">55%</span>
+        </div>
+      ` : ''}
     </div>
   `).join('');
 
   MEDIA_FIELDS.forEach((f) => {
     const urlInput = document.getElementById(f.key);
     const preview = container.querySelector(`[data-preview-for="${f.key}"]`);
+    const audioPreview = container.querySelector(`[data-audio-preview-for="${f.key}"]`);
     const fileInput = container.querySelector(`[data-upload-target="${f.key}"]`);
     const statusEl = container.querySelector(`[data-status-for="${f.key}"]`);
 
     const updatePreview = () => {
-      preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
+      if (audioPreview) {
+        audioPreview.src = urlInput.value || '';
+      } else if (preview) {
+        preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
+      }
       if (f.positionKey) updateFocalMedia(f);
     };
     urlInput.addEventListener('input', updatePreview);
@@ -965,6 +985,16 @@ function renderMediaFields() {
         scheduleRefreshPreviews();
       });
     }
+
+    if (f.overlayKey) {
+      const overlaySlider = container.querySelector(`[data-overlay-for="${f.key}"]`);
+      const overlayLabel = container.querySelector(`[data-overlay-label-for="${f.key}"]`);
+      overlaySlider.addEventListener('input', () => {
+        document.getElementById(f.overlayKey).value = overlaySlider.value;
+        overlayLabel.textContent = `${Math.round(overlaySlider.value * 100)}%`;
+        scheduleRefreshPreviews();
+      });
+    }
   });
 }
 
@@ -984,16 +1014,18 @@ function updateFocalMedia(f) {
   const pos = document.getElementById(f.positionKey)?.value || '50% 50%';
   const zoom = Number(document.getElementById(f.zoomKey)?.value) || 1;
   const style = `object-position:${pos};transform-origin:${pos};transform:scale(${zoom})`;
+  const isVideo = f.kind === 'video' || (f.kind === 'auto' && isVideoUrl(url));
   holder.innerHTML = url
-    ? (f.kind === 'video'
+    ? (isVideo
         ? `<video src="${url.replace(/"/g, '&quot;')}" muted style="${style}"></video>`
         : `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="${style}">`)
     : '';
 }
 
 function mediaPreviewMarkup(kind, url) {
-  if (!url) return `<span>no ${kind}</span>`;
-  return kind === 'video'
+  if (!url) return `<span>no ${kind === 'auto' ? 'media' : kind}</span>`;
+  const isVideo = kind === 'video' || (kind === 'auto' && isVideoUrl(url));
+  return isVideo
     ? `<video src="${url.replace(/"/g, '&quot;')}" muted></video>`
     : `<img src="${url.replace(/"/g, '&quot;')}" alt="">`;
 }
@@ -1002,8 +1034,10 @@ function populateMediaFields(media = {}) {
   MEDIA_FIELDS.forEach((f) => {
     const urlInput = document.getElementById(f.key);
     const preview = document.querySelector(`[data-preview-for="${f.key}"]`);
+    const audioPreview = document.querySelector(`[data-audio-preview-for="${f.key}"]`);
     urlInput.value = media[f.key] || '';
-    preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
+    if (audioPreview) audioPreview.src = urlInput.value || '';
+    else if (preview) preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
     if (f.positionKey) {
       const zoomVal = Number(media[f.zoomKey]) || 1;
       document.getElementById(f.zoomKey).value = zoomVal;
@@ -1014,6 +1048,14 @@ function populateMediaFields(media = {}) {
       setFocalPosition(f, media[f.positionKey] || '50% 50%');
       updateFocalMedia(f);
     }
+    if (f.overlayKey) {
+      const overlayVal = media[f.overlayKey] != null ? Number(media[f.overlayKey]) : 0.55;
+      document.getElementById(f.overlayKey).value = overlayVal;
+      const overlaySlider = document.querySelector(`[data-overlay-for="${f.key}"]`);
+      const overlayLabel = document.querySelector(`[data-overlay-label-for="${f.key}"]`);
+      if (overlaySlider) overlaySlider.value = overlayVal;
+      if (overlayLabel) overlayLabel.textContent = `${Math.round(overlayVal * 100)}%`;
+    }
   });
 }
 
@@ -1023,6 +1065,7 @@ function readMediaFields() {
     media[f.key] = document.getElementById(f.key).value;
     if (f.positionKey) media[f.positionKey] = document.getElementById(f.positionKey).value;
     if (f.zoomKey) media[f.zoomKey] = Number(document.getElementById(f.zoomKey).value) || 1;
+    if (f.overlayKey) media[f.overlayKey] = Number(document.getElementById(f.overlayKey).value) || 0;
   });
   return media;
 }

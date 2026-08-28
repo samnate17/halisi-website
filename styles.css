@@ -28,6 +28,61 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+/* Optional site-wide background media, set from the admin panel.
+   When active, body's own background is made transparent so this shows
+   through (see body.has-site-bg below). It sits at z-index:0 rather than a
+   negative value — a negative z-index here would paint behind the browser's
+   own canvas fill (the propagated body background), hiding it entirely.
+   Real content is kept above it via main/footer's own z-index:1 below. */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  display: none;
+}
+.site-bg.is-active { display: block; }
+.site-bg-media { position: absolute; inset: 0; }
+.site-bg-media img, .site-bg-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.site-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+}
+body.has-site-bg { background: transparent; }
+main, .site-footer { position: relative; z-index: 1; }
+
+/* Homepage background-audio toggle */
+.audio-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 90;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.audio-toggle:hover { border-color: var(--text-dim); transform: scale(1.05); }
+.audio-toggle svg { width: 18px; height: 18px; }
+.audio-toggle .icon-sound-off { display: block; }
+.audio-toggle .icon-sound-on { display: none; }
+.audio-toggle.is-playing .icon-sound-off { display: none; }
+.audio-toggle.is-playing .icon-sound-on { display: block; }
+
 img { max-width: 100%; display: block; }
 
 .theme-toggle {
@@ -160,6 +215,9 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero-photo { animation: none; }
 }
+/* A manually-set zoom (from the admin panel) takes over from the automatic
+   breathing animation, which would otherwise silently override it every frame. */
+.hero-photo.is-zoomed { animation: none; }
 
 .hero-inner {
   position: relative;
