@@ -48,6 +48,23 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// Applies a focal-point position and zoom to an <img>/<video> — shared by
+// hero media, press photo, merch photos, and event covers.
+function applyFocal(el, position, zoom) {
+  if (!el) return;
+  const pos = position || '50% 50%';
+  const z = Number(zoom) || 1;
+  el.style.objectPosition = pos;
+  el.style.transformOrigin = pos;
+  el.style.transform = z !== 1 ? `scale(${z})` : '';
+}
+
+function focalStyleAttr(position, zoom) {
+  const pos = position || '50% 50%';
+  const z = Number(zoom) || 1;
+  return `object-position:${pos};transform-origin:${pos};${z !== 1 ? `transform:scale(${z});` : ''}`;
+}
+
 function renderContent(data) {
   const root = document.documentElement.style;
   if (data.design?.fontHeading) root.setProperty('--font-heading', `'${data.design.fontHeading}', sans-serif`);
@@ -73,11 +90,11 @@ function renderContent(data) {
     }
   }
   if (heroVideo && data.media?.heroPosterUrl) heroVideo.poster = data.media.heroPosterUrl;
-  if (heroVideo && data.media?.heroVideoPosition) heroVideo.style.objectPosition = data.media.heroVideoPosition;
+  applyFocal(heroVideo, data.media?.heroVideoPosition, data.media?.heroVideoZoom);
 
   const pressPhoto = document.getElementById('pressPhoto');
   if (pressPhoto && data.media?.pressPhotoUrl) pressPhoto.src = data.media.pressPhotoUrl;
-  if (pressPhoto && data.media?.pressPhotoPosition) pressPhoto.style.objectPosition = data.media.pressPhotoPosition;
+  applyFocal(pressPhoto, data.media?.pressPhotoPosition, data.media?.pressPhotoZoom);
 
   const heroTagline = document.getElementById('heroTagline');
   if (heroTagline && data.bio?.tagline) heroTagline.textContent = data.bio.tagline;
@@ -108,7 +125,7 @@ function renderContent(data) {
         <span class="list-date">${escapeHtml(ev.day)} ${escapeHtml(ev.month)}</span>
         <span class="list-title">${escapeHtml(ev.title)}</span>
         <span class="list-meta">${escapeHtml(ev.venue)}</span>
-        ${ev.imageUrl ? `<img class="list-thumb" src="${escapeHtml(ev.imageUrl)}" alt="" style="object-position:${escapeHtml(ev.imagePosition || '50% 50%')}">` : ''}
+        ${ev.imageUrl ? `<span class="list-thumb-wrap"><img class="list-thumb" src="${escapeHtml(ev.imageUrl)}" alt="" style="${focalStyleAttr(ev.imagePosition, ev.imageZoom)}"></span>` : ''}
         <a href="${escapeHtml(ev.ticketUrl || '#')}" class="list-link">tickets</a>
       </div>
     `).join('');
@@ -118,7 +135,7 @@ function renderContent(data) {
   if (merchGrid && Array.isArray(data.merch)) {
     merchGrid.innerHTML = data.merch.map((item) => `
       <article class="merch-item">
-        <div class="merch-photo"><img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" style="object-position:${escapeHtml(item.imagePosition || '50% 50%')}"></div>
+        <div class="merch-photo"><img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" style="${focalStyleAttr(item.imagePosition, item.imageZoom)}"></div>
         <div class="merch-info">
           <span class="merch-name">${escapeHtml(item.name)}</span>
           <span class="merch-price">${escapeHtml(item.price)}</span>

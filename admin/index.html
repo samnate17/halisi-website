@@ -244,6 +244,16 @@
   }
   .focal-marker::before { left: 50%; top: -6px; width: 2px; height: 6px; transform: translateX(-50%); }
   .focal-marker::after { top: 50%; left: -6px; width: 6px; height: 2px; transform: translateY(-50%); }
+  .zoom-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .zoom-row input[type="range"] { flex: 1; }
+  .zoom-row span:last-child { min-width: 40px; text-align: right; }
   .btn-link {
     background: none;
     border: none;
@@ -680,11 +690,17 @@ function addItemRow(listKey, values = {}) {
         <span class="upload-status" data-status-for="imageUrl"></span>
       </div>
       <div class="focal-block">
-        <p class="hint">Click the preview to choose what stays in frame when this photo is cropped.</p>
+        <p class="hint">Click the preview to choose what stays in frame when this photo is cropped. Use the slider to zoom in or out.</p>
         <input type="hidden" data-field="imagePosition" value="${(values.imagePosition ?? '50% 50%').toString().replace(/"/g, '&quot;')}">
+        <input type="hidden" data-field="imageZoom" value="${(values.imageZoom ?? 1).toString().replace(/"/g, '&quot;')}">
         <div class="focal-picker" data-merch-focal style="aspect-ratio: 1 / 1; max-width: 220px;">
           <div class="focal-media" data-merch-focal-media></div>
           <div class="focal-marker" data-merch-focal-marker></div>
+        </div>
+        <div class="zoom-row">
+          <span>Zoom</span>
+          <input type="range" min="1" max="3" step="0.05" value="${(values.imageZoom ?? 1)}" data-merch-zoom style="max-width: 220px;">
+          <span data-merch-zoom-label>${Math.round((values.imageZoom ?? 1) * 100)}%</span>
         </div>
         <button type="button" class="btn-link" data-merch-focal-reset>Reset to center</button>
       </div>
@@ -709,6 +725,9 @@ function addItemRow(listKey, values = {}) {
     const fileInput = card.querySelector('[data-upload-target="imageUrl"]');
     const statusEl = card.querySelector('[data-status-for="imageUrl"]');
     const posInput = card.querySelector('[data-field="imagePosition"]');
+    const zoomInput = card.querySelector('[data-field="imageZoom"]');
+    const zoomSlider = card.querySelector('[data-merch-zoom]');
+    const zoomLabel = card.querySelector('[data-merch-zoom-label]');
     const picker = card.querySelector('[data-merch-focal]');
     const marker = card.querySelector('[data-merch-focal-marker]');
     const focalMedia = card.querySelector('[data-merch-focal-media]');
@@ -716,11 +735,19 @@ function addItemRow(listKey, values = {}) {
     const updateFocal = () => {
       const url = imageUrlInput.value;
       const pos = posInput.value || '50% 50%';
-      focalMedia.innerHTML = url ? `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="object-position:${pos}">` : '';
+      const zoom = Number(zoomInput.value) || 1;
+      focalMedia.innerHTML = url ? `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="object-position:${pos};transform-origin:${pos};transform:scale(${zoom})">` : '';
       const [xStr, yStr] = pos.split(' ');
       marker.style.left = xStr;
       marker.style.top = yStr;
     };
+
+    zoomSlider.addEventListener('input', () => {
+      zoomInput.value = zoomSlider.value;
+      zoomLabel.textContent = `${Math.round(zoomSlider.value * 100)}%`;
+      updateFocal();
+      scheduleRefreshPreviews();
+    });
 
     imageUrlInput.addEventListener('input', () => { thumb.src = imageUrlInput.value; updateFocal(); });
 
@@ -735,6 +762,9 @@ function addItemRow(listKey, values = {}) {
 
     card.querySelector('[data-merch-focal-reset]').addEventListener('click', () => {
       posInput.value = '50% 50%';
+      zoomInput.value = '1';
+      zoomSlider.value = '1';
+      zoomLabel.textContent = '100%';
       updateFocal();
       scheduleRefreshPreviews();
     });
@@ -833,9 +863,9 @@ function readItemRows(listKey) {
 
 const MEDIA_FIELDS = [
   { key: 'logoUrl', label: 'Logo', kind: 'image', accept: 'image/png,image/svg+xml,image/webp', hint: 'Neon site only — shown in its header and footer instead of the text wordmark. A transparent PNG or SVG works best. Leave empty to keep the plain text logo. (The minimal site always uses the text wordmark.)' },
-  { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.', positionKey: 'heroVideoPosition', previewAspect: '21 / 9' },
+  { key: 'heroVideoUrl', label: 'Hero video', kind: 'video', accept: 'video/mp4,video/webm', hint: 'Looping background video behind the homepage title. Keep it short (under ~15s) and compressed — large files are slower to upload and to load for visitors.', positionKey: 'heroVideoPosition', zoomKey: 'heroVideoZoom', previewAspect: '21 / 9' },
   { key: 'heroPosterUrl', label: 'Hero poster / fallback image', kind: 'image', accept: 'image/*', hint: 'Shown while the video loads, and used as the background if video playback fails.' },
-  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.', positionKey: 'pressPhotoPosition', previewAspect: '4 / 5' }
+  { key: 'pressPhotoUrl', label: 'Press photo', kind: 'image', accept: 'image/*', hint: 'Shown in the About section.', positionKey: 'pressPhotoPosition', zoomKey: 'pressPhotoZoom', previewAspect: '4 / 5' }
 ];
 
 function renderMediaFields() {
@@ -859,11 +889,17 @@ function renderMediaFields() {
       </div>
       ${f.positionKey ? `
         <div class="focal-block">
-          <p class="hint">Click anywhere on the preview below to choose what stays in frame when this ${f.kind} is cropped to fill the screen.</p>
+          <p class="hint">Click anywhere on the preview below to choose what stays in frame when this ${f.kind} is cropped to fill the screen. Use the slider to zoom in or out.</p>
           <input type="hidden" id="${f.positionKey}" value="50% 50%">
+          <input type="hidden" id="${f.zoomKey}" value="1">
           <div class="focal-picker" data-focal-for="${f.key}" style="aspect-ratio: ${f.previewAspect};">
             <div class="focal-media" data-focal-media-for="${f.key}"></div>
             <div class="focal-marker" data-focal-marker-for="${f.key}"></div>
+          </div>
+          <div class="zoom-row">
+            <span>Zoom</span>
+            <input type="range" min="1" max="3" step="0.05" value="1" data-zoom-for="${f.key}" style="max-width: 220px;">
+            <span data-zoom-label-for="${f.key}">100%</span>
           </div>
           <button type="button" class="btn-link" data-reset-focal="${f.key}">Reset to center</button>
         </div>
@@ -909,10 +945,23 @@ function renderMediaFields() {
         const x = Math.round(Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)));
         const y = Math.round(Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)));
         setFocalPosition(f, `${x}% ${y}%`);
+        updateFocalMedia(f);
+        scheduleRefreshPreviews();
+      });
+      const zoomSlider = container.querySelector(`[data-zoom-for="${f.key}"]`);
+      const zoomLabel = container.querySelector(`[data-zoom-label-for="${f.key}"]`);
+      zoomSlider.addEventListener('input', () => {
+        document.getElementById(f.zoomKey).value = zoomSlider.value;
+        zoomLabel.textContent = `${Math.round(zoomSlider.value * 100)}%`;
+        updateFocalMedia(f);
         scheduleRefreshPreviews();
       });
       container.querySelector(`[data-reset-focal="${f.key}"]`).addEventListener('click', () => {
         setFocalPosition(f, '50% 50%');
+        document.getElementById(f.zoomKey).value = '1';
+        zoomSlider.value = '1';
+        zoomLabel.textContent = '100%';
+        updateFocalMedia(f);
         scheduleRefreshPreviews();
       });
     }
@@ -933,10 +982,12 @@ function updateFocalMedia(f) {
   const holder = document.querySelector(`[data-focal-media-for="${f.key}"]`);
   if (!holder) return;
   const pos = document.getElementById(f.positionKey)?.value || '50% 50%';
+  const zoom = Number(document.getElementById(f.zoomKey)?.value) || 1;
+  const style = `object-position:${pos};transform-origin:${pos};transform:scale(${zoom})`;
   holder.innerHTML = url
     ? (f.kind === 'video'
-        ? `<video src="${url.replace(/"/g, '&quot;')}" muted style="object-position:${pos}"></video>`
-        : `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="object-position:${pos}">`)
+        ? `<video src="${url.replace(/"/g, '&quot;')}" muted style="${style}"></video>`
+        : `<img src="${url.replace(/"/g, '&quot;')}" alt="" style="${style}">`)
     : '';
 }
 
@@ -954,6 +1005,12 @@ function populateMediaFields(media = {}) {
     urlInput.value = media[f.key] || '';
     preview.innerHTML = mediaPreviewMarkup(f.kind, urlInput.value);
     if (f.positionKey) {
+      const zoomVal = Number(media[f.zoomKey]) || 1;
+      document.getElementById(f.zoomKey).value = zoomVal;
+      const zoomSlider = document.querySelector(`[data-zoom-for="${f.key}"]`);
+      const zoomLabel = document.querySelector(`[data-zoom-label-for="${f.key}"]`);
+      if (zoomSlider) zoomSlider.value = zoomVal;
+      if (zoomLabel) zoomLabel.textContent = `${Math.round(zoomVal * 100)}%`;
       setFocalPosition(f, media[f.positionKey] || '50% 50%');
       updateFocalMedia(f);
     }
@@ -965,6 +1022,7 @@ function readMediaFields() {
   MEDIA_FIELDS.forEach((f) => {
     media[f.key] = document.getElementById(f.key).value;
     if (f.positionKey) media[f.positionKey] = document.getElementById(f.positionKey).value;
+    if (f.zoomKey) media[f.zoomKey] = Number(document.getElementById(f.zoomKey).value) || 1;
   });
   return media;
 }
