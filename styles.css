@@ -292,7 +292,7 @@ section:not(.hero) {
   border-top: none;
   text-align: left;
 }
-.list-row.has-thumb { grid-template-columns: 48px auto 1fr auto auto; }
+.list-row.has-thumb { grid-template-columns: auto 1fr auto 48px auto; }
 .list-thumb {
   width: 48px;
   height: 48px;
