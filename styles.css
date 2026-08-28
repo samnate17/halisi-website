@@ -134,12 +134,18 @@ a { color: inherit; text-decoration: none; }
 }
 
 .section-label {
+  display: inline-block;
+  font-family: var(--font-heading);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--text-dim);
-  margin-bottom: 32px;
+  letter-spacing: 0.01em;
+  font-size: clamp(1.5rem, 4.5vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(90deg, var(--accent, var(--text)), var(--accent-2, var(--text)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 28px;
 }
 
 /* Header */
@@ -679,6 +685,9 @@ select option { background: var(--bg); }
 
   .form-row-split { flex-direction: column; }
   .list-row { grid-template-columns: 1fr; gap: 6px; }
+  /* .has-thumb's own column template (2 classes) otherwise out-specifies
+     the rule above and stays a squeezed single row even on mobile. */
+  .list-row.has-thumb { grid-template-columns: 1fr; gap: 10px; }
   .list-meta, .list-link { justify-self: start; }
   .social-links { flex-direction: column; gap: 20px; }
 }
