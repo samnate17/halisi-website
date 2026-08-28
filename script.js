@@ -105,10 +105,10 @@ function renderContent(data) {
   if (eventsList && Array.isArray(data.events)) {
     eventsList.innerHTML = data.events.map((ev) => `
       <div class="list-row${ev.imageUrl ? ' has-thumb' : ''}">
-        ${ev.imageUrl ? `<img class="list-thumb" src="${escapeHtml(ev.imageUrl)}" alt="" style="object-position:${escapeHtml(ev.imagePosition || '50% 50%')}">` : ''}
         <span class="list-date">${escapeHtml(ev.day)} ${escapeHtml(ev.month)}</span>
         <span class="list-title">${escapeHtml(ev.title)}</span>
         <span class="list-meta">${escapeHtml(ev.venue)}</span>
+        ${ev.imageUrl ? `<img class="list-thumb" src="${escapeHtml(ev.imageUrl)}" alt="" style="object-position:${escapeHtml(ev.imagePosition || '50% 50%')}">` : ''}
         <a href="${escapeHtml(ev.ticketUrl || '#')}" class="list-link">tickets</a>
       </div>
     `).join('');
