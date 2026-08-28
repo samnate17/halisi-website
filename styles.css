@@ -635,17 +635,23 @@ select option { background: var(--bg); }
 /* Socials */
 .social-links {
   display: flex;
-  gap: 40px;
+  gap: 20px;
 }
 .social-links a {
-  font-size: 1.3rem;
-  font-family: var(--font-heading);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  color: var(--text);
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .social-links a:hover {
   border-color: var(--accent, var(--text));
   color: var(--accent, var(--text));
+  transform: scale(1.08);
 }
 
 /* Footer */
@@ -689,5 +695,5 @@ select option { background: var(--bg); }
      the rule above and stays a squeezed single row even on mobile. */
   .list-row.has-thumb { grid-template-columns: 1fr; gap: 10px; }
   .list-meta, .list-link { justify-self: start; }
-  .social-links { flex-direction: column; gap: 20px; }
+  .social-links { flex-wrap: wrap; gap: 14px; }
 }
