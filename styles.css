@@ -410,24 +410,60 @@ section:not(.hero) {
 }
 .list-link:hover { color: var(--accent, var(--text)); }
 
-.play-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  border: 1px solid var(--text-dim);
-  background: none;
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.15s ease, border-color 0.15s ease;
+/* Mixes — card grid with a play button that morphs into a running
+   equalizer, mirroring the neon site's more energetic treatment. */
+.mix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
 }
-.list-row.playing .play-dot {
-  background: var(--accent, var(--text));
-  border-color: var(--accent, var(--text));
+.mix-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.mix-card:hover { border-color: var(--accent, var(--text)); transform: translateY(-3px); }
+
+.play-btn {
+  flex-shrink: 0;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--accent, var(--text)), var(--accent-2, var(--text)));
+  color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.play-btn:hover { transform: scale(1.08); }
+.mix-card.playing .play-btn .icon-play { display: none; }
+.mix-card:not(.playing) .play-btn .icon-pause { display: none !important; }
+.mix-card.playing .play-btn .icon-pause { display: block !important; }
+
+.eq { display: none; gap: 3px; align-items: flex-end; height: 15px; }
+.mix-card.playing .play-btn svg { display: none; }
+.mix-card.playing .eq { display: flex; }
+.eq i {
+  width: 3px;
+  background: var(--bg);
+  animation: eq 0.9s ease-in-out infinite;
+}
+.eq i:nth-child(1) { height: 40%; animation-delay: 0s; }
+.eq i:nth-child(2) { height: 100%; animation-delay: 0.15s; }
+.eq i:nth-child(3) { height: 60%; animation-delay: 0.3s; }
+.eq i:nth-child(4) { height: 80%; animation-delay: 0.45s; }
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
 }
 
-.mixes .list-row {
-  grid-template-columns: auto 1fr auto auto auto;
-  cursor: pointer;
-}
+.mix-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.mix-info .list-title { display: block; }
+.mix-info .list-meta { justify-self: auto; }
+.mix-card .list-link { flex-shrink: 0; justify-self: auto; }
 
 /* Merch */
 .merch-grid {

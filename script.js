@@ -31,15 +31,18 @@ window.addEventListener('scroll', () => {
 
 // Mix "play" demo state (visual only — wire up real audio/embeds later)
 function wireMixRows() {
-  const mixRows = document.querySelectorAll('[data-mix]');
-  mixRows.forEach((row) => {
-    row.addEventListener('click', () => {
-      const wasPlaying = row.classList.contains('playing');
-      mixRows.forEach((r) => r.classList.remove('playing'));
-      if (!wasPlaying) row.classList.add('playing');
+  const mixCards = document.querySelectorAll('[data-mix]');
+  mixCards.forEach((card) => {
+    const btn = card.querySelector('.play-btn');
+    btn?.addEventListener('click', () => {
+      const wasPlaying = card.classList.contains('playing');
+      mixCards.forEach((c) => c.classList.remove('playing'));
+      if (!wasPlaying) card.classList.add('playing');
     });
   });
 }
+
+const PLAY_ICON = '<svg class="icon-play" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"/></svg><svg class="icon-pause" viewBox="0 0 24 24" width="20" height="20" hidden><path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg><span class="eq"><i></i><i></i><i></i><i></i></span>';
 
 // Render site content from content.json (edited via /admin)
 function escapeHtml(str) {
@@ -182,11 +185,12 @@ function renderContent(data) {
   const mixesList = document.getElementById('mixesList');
   if (mixesList && Array.isArray(data.mixes)) {
     mixesList.innerHTML = data.mixes.map((mix) => `
-      <article class="list-row" data-mix>
-        <button class="play-dot" aria-label="Play mix"></button>
-        <span class="list-title">${escapeHtml(mix.title)}</span>
-        <span class="list-meta">${escapeHtml(mix.genre)}</span>
-        <span class="list-meta">${escapeHtml(mix.duration)}</span>
+      <article class="mix-card" data-mix>
+        <button class="play-btn" aria-label="Play mix">${PLAY_ICON}</button>
+        <div class="mix-info">
+          <span class="list-title">${escapeHtml(mix.title)}</span>
+          <span class="list-meta">${escapeHtml(mix.genre)} · ${escapeHtml(mix.duration)}</span>
+        </div>
         <a href="${escapeHtml(mix.listenUrl || '#')}" class="list-link" target="_blank" rel="noopener">listen</a>
       </article>
     `).join('');
