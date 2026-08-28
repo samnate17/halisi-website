@@ -97,15 +97,35 @@
     border: none;
   }
   .btn-remove {
-    position: absolute;
-    top: 12px;
-    right: 12px;
     background: none;
     border: none;
     color: var(--text-dim);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    line-height: 1;
     padding: 4px 8px;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .drag-handle {
+    display: flex;
+    align-items: center;
+    color: var(--text-dim);
+    cursor: grab;
+    touch-action: none;
+    padding: 8px 10px;
+    margin: -8px -10px;
+  }
+  .drag-handle:hover { color: var(--text); }
+  .item-card.dragging {
+    opacity: 0.5;
+  }
+  .item-card.drop-target {
+    border-color: var(--accent-2);
   }
   .btn-remove:hover { color: var(--err); }
   .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -644,6 +664,12 @@ function addItemRow(listKey, values = {}) {
   const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : fields.length === 2 ? 'row-2' : 'row-1';
   const hasImageUpload = listKey === 'merch' || listKey === 'events';
   card.innerHTML = `
+    <div class="card-header">
+      <span class="drag-handle" title="Drag to reorder">
+        <svg viewBox="0 0 10 16" width="10" height="16"><circle cx="2" cy="2" r="1.4"/><circle cx="8" cy="2" r="1.4"/><circle cx="2" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="2" cy="14" r="1.4"/><circle cx="8" cy="14" r="1.4"/></svg>
+      </span>
+      <button type="button" class="btn-remove" title="Remove">&times;</button>
+    </div>
     ${hasImageUpload ? `
       <div class="merch-upload-row">
         <img class="merch-thumb" data-thumb-for="imageUrl" src="${(values.imageUrl ?? '').toString().replace(/"/g, '&quot;')}" alt="">
@@ -671,7 +697,6 @@ function addItemRow(listKey, values = {}) {
         </div>
       `).join('')}
     </div>
-    <button type="button" class="btn-remove" title="Remove">&times;</button>
   `;
   card.querySelector('.btn-remove').addEventListener('click', () => {
     card.remove();
@@ -745,6 +770,52 @@ document.querySelectorAll('[data-add]').forEach((btn) => {
     addItemRow(btn.dataset.add);
     scheduleRefreshPreviews();
   });
+});
+
+// ---- Drag-to-reorder for repeatable rows ----
+
+function makeSortable(container) {
+  let draggedCard = null;
+
+  function onPointerMove(e) {
+    if (!draggedCard) return;
+    const siblings = Array.from(container.querySelectorAll('.item-card:not(.dragging)'));
+    const y = e.clientY;
+    let nextSibling = null;
+    for (const sib of siblings) {
+      const rect = sib.getBoundingClientRect();
+      if (y < rect.top + rect.height / 2) { nextSibling = sib; break; }
+    }
+    if (nextSibling) container.insertBefore(draggedCard, nextSibling);
+    else container.appendChild(draggedCard);
+  }
+
+  function onPointerUp() {
+    if (draggedCard) {
+      draggedCard.classList.remove('dragging');
+      draggedCard = null;
+      scheduleRefreshPreviews();
+    }
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+  }
+
+  container.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    const card = handle.closest('.item-card');
+    if (!card || card.parentElement !== container) return;
+    e.preventDefault();
+    draggedCard = card;
+    card.classList.add('dragging');
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+  });
+}
+
+['mixesItems', 'eventsItems', 'merchItems', 'unavailableDatesItems'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) makeSortable(el);
 });
 
 function readItemRows(listKey) {
