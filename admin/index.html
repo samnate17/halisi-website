@@ -364,7 +364,15 @@
           <div>
             <label for="fontHeading">Heading font</label>
             <select id="fontHeading">
-              <option value="Space Grotesk">Space Grotesk (default)</option>
+              <option value="Unbounded">Unbounded (default)</option>
+              <option value="Bungee">Bungee</option>
+              <option value="Monoton">Monoton</option>
+              <option value="Anton">Anton</option>
+              <option value="Righteous">Righteous</option>
+              <option value="Permanent Marker">Permanent Marker</option>
+              <option value="Pacifico">Pacifico</option>
+              <option value="Fredoka">Fredoka</option>
+              <option value="Space Grotesk">Space Grotesk</option>
               <option value="Playfair Display">Playfair Display</option>
               <option value="Archivo Black">Archivo Black</option>
               <option value="DM Serif Display">DM Serif Display</option>
@@ -1094,11 +1102,11 @@ document.getElementById('resetDesignBtn').addEventListener('click', () => {
 });
 
 function populateDesignFields(design = {}) {
-  document.getElementById('fontHeading').value = design.fontHeading || 'Space Grotesk';
+  document.getElementById('fontHeading').value = design.fontHeading || 'Unbounded';
   document.getElementById('fontBody').value = design.fontBody || 'Inter';
-  document.getElementById('accentColor').value = design.accentColor || '';
+  document.getElementById('accentColor').value = design.accentColor || '#ff2e93';
   document.getElementById('accentColorPicker').value = design.accentColor || '#ff2e93';
-  document.getElementById('accentColor2').value = design.accentColor2 || '';
+  document.getElementById('accentColor2').value = design.accentColor2 || '#22e5ff';
   document.getElementById('accentColor2Picker').value = design.accentColor2 || '#22e5ff';
 }
 
