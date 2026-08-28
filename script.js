@@ -57,6 +57,7 @@ function applyFocal(el, position, zoom) {
   el.style.objectPosition = pos;
   el.style.transformOrigin = pos;
   el.style.transform = z !== 1 ? `scale(${z})` : '';
+  el.classList.toggle('is-zoomed', z !== 1);
 }
 
 function focalStyleAttr(position, zoom) {
@@ -65,7 +66,80 @@ function focalStyleAttr(position, zoom) {
   return `object-position:${pos};transform-origin:${pos};${z !== 1 ? `transform:scale(${z});` : ''}`;
 }
 
+// Optional full-page background media (image or video), set from the admin
+// panel. Video vs. image is inferred from the file extension.
+function applySiteBackground(media) {
+  const siteBg = document.getElementById('siteBg');
+  const siteBgMedia = document.getElementById('siteBgMedia');
+  const siteBgOverlay = document.getElementById('siteBgOverlay');
+  if (!siteBg || !siteBgMedia || !siteBgOverlay) return;
+
+  const url = media?.siteBackgroundUrl;
+  if (!url) {
+    siteBgMedia.innerHTML = '';
+    siteBg.classList.remove('is-active');
+    document.body.classList.remove('has-site-bg');
+    return;
+  }
+
+  const isVideo = /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
+  const pos = media.siteBackgroundPosition || '50% 50%';
+  const zoom = Number(media.siteBackgroundZoom) || 1;
+  const styleAttr = `object-position:${pos};transform-origin:${pos};transform:scale(${zoom})`;
+
+  if (siteBgMedia.dataset.url !== url) {
+    siteBgMedia.dataset.url = url;
+    siteBgMedia.innerHTML = isVideo
+      ? `<video autoplay muted loop playsinline style="${styleAttr}"><source src="${escapeHtml(url)}"></video>`
+      : `<img src="${escapeHtml(url)}" alt="" style="${styleAttr}">`;
+    if (isVideo) {
+      const v = siteBgMedia.querySelector('video');
+      if (v && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        v.muted = true;
+        v.play().catch(() => {});
+      }
+    }
+  } else {
+    const el = siteBgMedia.querySelector('img, video');
+    if (el) el.setAttribute('style', styleAttr);
+  }
+
+  const overlay = media.siteBackgroundOverlay != null ? Number(media.siteBackgroundOverlay) : 0.55;
+  siteBgOverlay.style.opacity = String(overlay);
+  siteBg.classList.add('is-active');
+  document.body.classList.add('has-site-bg');
+}
+
+// Optional looping background audio, set from the admin panel. Starts muted/
+// paused — browsers block audible autoplay, and a visitor should choose to
+// turn it on — the speaker button (wired once, below) toggles it.
+function applyHomepageAudio(media) {
+  const audio = document.getElementById('homepageAudio');
+  const toggle = document.getElementById('audioToggle');
+  if (!audio || !toggle) return;
+
+  const url = media?.homepageAudioUrl;
+  if (!url) {
+    toggle.hidden = true;
+    toggle.classList.remove('is-playing');
+    audio.pause();
+    audio.removeAttribute('src');
+    delete audio.dataset.src;
+    return;
+  }
+
+  if (audio.dataset.src !== url) {
+    const wasPlaying = !audio.paused;
+    audio.dataset.src = url;
+    audio.src = url;
+    if (wasPlaying) audio.play().catch(() => {});
+  }
+  toggle.hidden = false;
+}
+
 function renderContent(data) {
+  applySiteBackground(data.media || {});
+  applyHomepageAudio(data.media || {});
   const root = document.documentElement.style;
   if (data.design?.fontHeading) root.setProperty('--font-heading', `'${data.design.fontHeading}', sans-serif`);
   if (data.design?.fontBody) root.setProperty('--font-body', `'${data.design.fontBody}', sans-serif`);
@@ -300,6 +374,20 @@ themeToggle?.addEventListener('click', () => {
   document.documentElement.setAttribute('data-theme', next);
   try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
   updateThemeLabel();
+});
+
+// Homepage background-audio toggle
+const audioToggle = document.getElementById('audioToggle');
+const homepageAudio = document.getElementById('homepageAudio');
+audioToggle?.addEventListener('click', () => {
+  if (!homepageAudio.src) return;
+  if (homepageAudio.paused) {
+    audioToggle.classList.add('is-playing');
+    homepageAudio.play().catch(() => { audioToggle.classList.remove('is-playing'); });
+  } else {
+    homepageAudio.pause();
+    audioToggle.classList.remove('is-playing');
+  }
 });
 
 // Scroll-reveal for sections
