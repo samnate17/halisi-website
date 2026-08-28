@@ -364,7 +364,7 @@ function currentTheme() {
 }
 
 function updateThemeLabel() {
-  if (themeToggle) themeToggle.textContent = currentTheme() === 'dark' ? 'light' : 'dark';
+  if (themeToggle) themeToggle.textContent = currentTheme() === 'dark' ? 'Light mode' : 'Dark mode';
 }
 
 updateThemeLabel();

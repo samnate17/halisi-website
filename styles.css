@@ -85,17 +85,27 @@ main, .site-footer { position: relative; z-index: 1; }
 
 img { max-width: 100%; display: block; }
 
+/* Light/dark mode toggle — floats bottom-left, mirroring the audio toggle
+   on the bottom-right, so it's reachable on every screen size without
+   opening the mobile nav menu. */
 .theme-toggle {
-  background: none;
-  border: none;
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 90;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
   cursor: pointer;
   font: inherit;
   font-size: 0.8rem;
   letter-spacing: 0.04em;
-  color: var(--text-dim);
-  padding: 0;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
-.theme-toggle:hover { color: var(--accent, var(--text)); }
+.theme-toggle:hover { border-color: var(--text-dim); transform: scale(1.05); }
 
 @media (prefers-reduced-motion: no-preference) {
   .reveal {
@@ -664,7 +674,7 @@ select option { background: var(--bg); }
   }
   .nav-links.open { max-height: 400px; }
   .nav-links li { width: 100%; }
-  .nav-links a, .nav-links .theme-toggle { display: block; padding: 16px 24px; width: 100%; text-align: left; }
+  .nav-links a { display: block; padding: 16px 24px; width: 100%; text-align: left; }
   .nav-toggle { display: flex; }
 
   .form-row-split { flex-direction: column; }
