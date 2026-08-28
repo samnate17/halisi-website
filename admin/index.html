@@ -65,6 +65,7 @@
   .row-2 { grid-template-columns: 1fr 1fr; }
   .row-3 { grid-template-columns: 1fr 1fr 1fr; }
   .row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .row-5 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
   .item-card {
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -280,7 +281,7 @@
     .wrap { padding: 20px 14px 80px; }
     h1 { font-size: 1.3rem; }
     .section { padding: 16px; border-radius: 10px; }
-    .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
+    .row-2, .row-3, .row-4, .row-5 { grid-template-columns: 1fr; }
     .row-1 { max-width: none; }
     .top-bar { align-items: flex-start; }
     .top-bar .btn, .top-bar .actions { width: 100%; }
@@ -651,7 +652,8 @@ const FIELD_DEFS = {
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'genre', label: 'Genre', type: 'text' },
     { key: 'duration', label: 'Duration', type: 'text' },
-    { key: 'listenUrl', label: 'Listen URL', type: 'url' }
+    { key: 'listenUrl', label: 'Listen URL', type: 'url' },
+    { key: 'previewUrl', label: 'Preview clip URL (optional, ~20s)', type: 'url' }
   ],
   events: [
     { key: 'day', label: 'Day', type: 'text' },
@@ -679,8 +681,9 @@ function addItemRow(listKey, values = {}) {
   card.dataset.list = listKey;
 
   const fields = FIELD_DEFS[listKey];
-  const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : fields.length === 2 ? 'row-2' : 'row-1';
+  const rowClass = fields.length >= 5 ? 'row-5' : fields.length === 4 ? 'row-4' : fields.length === 3 ? 'row-3' : fields.length === 2 ? 'row-2' : 'row-1';
   const hasImageUpload = listKey === 'merch' || listKey === 'events';
+  const hasAudioUpload = listKey === 'mixes';
   card.innerHTML = `
     <div class="card-header">
       <span class="drag-handle" title="Drag to reorder">
@@ -688,6 +691,16 @@ function addItemRow(listKey, values = {}) {
       </span>
       <button type="button" class="btn-remove" title="Remove">&times;</button>
     </div>
+    ${hasAudioUpload ? `
+      <div class="merch-upload-row">
+        <label class="file-btn">
+          Upload preview clip
+          <input type="file" accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav" class="file-input" data-upload-target="previewUrl" hidden>
+        </label>
+        <span class="upload-status" data-status-for="previewUrl"></span>
+      </div>
+      <audio controls style="width:100%;margin-bottom:14px;" data-audio-preview-for="previewUrl" src="${(values.previewUrl ?? '').toString().replace(/"/g, '&quot;')}"></audio>
+    ` : ''}
     ${hasImageUpload ? `
       <div class="merch-upload-row">
         <img class="merch-thumb" data-thumb-for="imageUrl" src="${(values.imageUrl ?? '').toString().replace(/"/g, '&quot;')}" alt="">
@@ -798,6 +811,34 @@ function addItemRow(listKey, values = {}) {
     });
 
     updateFocal();
+  }
+
+  if (hasAudioUpload) {
+    const previewUrlInput = card.querySelector('[data-field="previewUrl"]');
+    const audioPreview = card.querySelector('[data-audio-preview-for="previewUrl"]');
+    const fileInput = card.querySelector('[data-upload-target="previewUrl"]');
+    const statusEl = card.querySelector('[data-status-for="previewUrl"]');
+
+    previewUrlInput.addEventListener('input', () => { audioPreview.src = previewUrlInput.value; });
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      statusEl.textContent = 'Uploading…';
+      statusEl.className = 'upload-status';
+      try {
+        const url = await ghUploadFile(file, (msg) => { statusEl.textContent = msg; });
+        previewUrlInput.value = url;
+        audioPreview.src = url;
+        statusEl.textContent = 'Uploaded ✓';
+        statusEl.className = 'upload-status ok';
+        scheduleRefreshPreviews();
+      } catch (err) {
+        statusEl.textContent = err.message;
+        statusEl.className = 'upload-status err';
+      }
+      fileInput.value = '';
+    });
   }
 
   container.appendChild(card);
