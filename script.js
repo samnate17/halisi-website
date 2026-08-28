@@ -104,7 +104,8 @@ function renderContent(data) {
   const eventsList = document.getElementById('eventsList');
   if (eventsList && Array.isArray(data.events)) {
     eventsList.innerHTML = data.events.map((ev) => `
-      <div class="list-row">
+      <div class="list-row${ev.imageUrl ? ' has-thumb' : ''}">
+        ${ev.imageUrl ? `<img class="list-thumb" src="${escapeHtml(ev.imageUrl)}" alt="" style="object-position:${escapeHtml(ev.imagePosition || '50% 50%')}">` : ''}
         <span class="list-date">${escapeHtml(ev.day)} ${escapeHtml(ev.month)}</span>
         <span class="list-title">${escapeHtml(ev.title)}</span>
         <span class="list-meta">${escapeHtml(ev.venue)}</span>

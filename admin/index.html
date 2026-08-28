@@ -620,7 +620,8 @@ const FIELD_DEFS = {
     { key: 'month', label: 'Month', type: 'text' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'venue', label: 'Venue', type: 'text' },
-    { key: 'ticketUrl', label: 'Ticket URL', type: 'url' }
+    { key: 'ticketUrl', label: 'Ticket URL', type: 'url' },
+    { key: 'imageUrl', label: 'Cover Image URL', type: 'url' }
   ],
   merch: [
     { key: 'name', label: 'Name', type: 'text' },
@@ -641,9 +642,9 @@ function addItemRow(listKey, values = {}) {
 
   const fields = FIELD_DEFS[listKey];
   const rowClass = fields.length >= 4 ? 'row-4' : fields.length === 3 ? 'row-3' : fields.length === 2 ? 'row-2' : 'row-1';
-  const isMerch = listKey === 'merch';
+  const hasImageUpload = listKey === 'merch' || listKey === 'events';
   card.innerHTML = `
-    ${isMerch ? `
+    ${hasImageUpload ? `
       <div class="merch-upload-row">
         <img class="merch-thumb" data-thumb-for="imageUrl" src="${(values.imageUrl ?? '').toString().replace(/"/g, '&quot;')}" alt="">
         <label class="file-btn">
@@ -677,7 +678,7 @@ function addItemRow(listKey, values = {}) {
     scheduleRefreshPreviews();
   });
 
-  if (isMerch) {
+  if (hasImageUpload) {
     const imageUrlInput = card.querySelector('[data-field="imageUrl"]');
     const thumb = card.querySelector('[data-thumb-for="imageUrl"]');
     const fileInput = card.querySelector('[data-upload-target="imageUrl"]');
