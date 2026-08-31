@@ -408,6 +408,25 @@
             </div>
           </div>
         </div>
+        <div class="row row-2">
+          <div>
+            <label for="heroTextColor">Homepage title/tagline color</label>
+            <div class="color-row">
+              <input type="color" id="heroTextColorPicker" value="#ffffff">
+              <input type="text" id="heroTextColor" placeholder="Leave empty for the default text color">
+            </div>
+            <p class="hint">Overrides the color of the big title and tagline on the homepage — useful if they're getting lost against the background video/image.</p>
+          </div>
+          <div>
+            <label for="heroContrast">Title/tagline contrast (shadow strength)</label>
+            <div class="zoom-row" style="margin-top: 8px;">
+              <span>Low</span>
+              <input type="range" min="0" max="1.5" step="0.05" value="1" id="heroContrast" style="max-width: none; flex: 1;">
+              <span>High</span>
+            </div>
+            <p class="hint">Boosts the dark shadow behind the homepage title/tagline so it stays readable over busy backgrounds.</p>
+          </div>
+        </div>
       </div>
 
       <div class="section">
@@ -1136,6 +1155,8 @@ function syncColorPair(pickerId, textId) {
 }
 syncColorPair('accentColorPicker', 'accentColor');
 syncColorPair('accentColor2Picker', 'accentColor2');
+syncColorPair('heroTextColorPicker', 'heroTextColor');
+document.getElementById('heroContrast').addEventListener('input', scheduleRefreshPreviews);
 
 document.getElementById('resetDesignBtn').addEventListener('click', () => {
   populateDesignFields({});
@@ -1149,6 +1170,9 @@ function populateDesignFields(design = {}) {
   document.getElementById('accentColorPicker').value = design.accentColor || '#ff2e93';
   document.getElementById('accentColor2').value = design.accentColor2 || '#22e5ff';
   document.getElementById('accentColor2Picker').value = design.accentColor2 || '#22e5ff';
+  document.getElementById('heroTextColor').value = design.heroTextColor || '';
+  document.getElementById('heroTextColorPicker').value = design.heroTextColor || '#ffffff';
+  document.getElementById('heroContrast').value = design.heroContrast != null ? design.heroContrast : 1;
 }
 
 function readDesignFields() {
@@ -1156,7 +1180,9 @@ function readDesignFields() {
     fontHeading: document.getElementById('fontHeading').value,
     fontBody: document.getElementById('fontBody').value,
     accentColor: document.getElementById('accentColor').value,
-    accentColor2: document.getElementById('accentColor2').value
+    accentColor2: document.getElementById('accentColor2').value,
+    heroTextColor: document.getElementById('heroTextColor').value,
+    heroContrast: Number(document.getElementById('heroContrast').value)
   };
 }
 
