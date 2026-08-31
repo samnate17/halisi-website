@@ -373,6 +373,14 @@
               <option value="Permanent Marker">Permanent Marker</option>
               <option value="Pacifico">Pacifico</option>
               <option value="Fredoka">Fredoka</option>
+              <option value="Luckiest Guy">Luckiest Guy</option>
+              <option value="Bangers">Bangers</option>
+              <option value="Chewy">Chewy</option>
+              <option value="Baloo 2">Baloo 2</option>
+              <option value="Caveat">Caveat</option>
+              <option value="Poppins">Poppins</option>
+              <option value="Comfortaa">Comfortaa</option>
+              <option value="Passion One">Passion One</option>
               <option value="Space Grotesk">Space Grotesk</option>
               <option value="Playfair Display">Playfair Display</option>
               <option value="Archivo Black">Archivo Black</option>
@@ -425,6 +433,13 @@
               <span>High</span>
             </div>
             <p class="hint">Boosts the dark shadow behind the homepage title/tagline so it stays readable over busy backgrounds.</p>
+          </div>
+        </div>
+        <div class="row row-1">
+          <div>
+            <label for="heroFont">Homepage title font (optional override)</label>
+            <select id="heroFont"></select>
+            <p class="hint">Uses the Heading font above by default — pick something different here to give just the big homepage title its own look.</p>
           </div>
         </div>
       </div>
@@ -1157,6 +1172,23 @@ syncColorPair('accentColorPicker', 'accentColor');
 syncColorPair('accentColor2Picker', 'accentColor2');
 syncColorPair('heroTextColorPicker', 'heroTextColor');
 document.getElementById('heroContrast').addEventListener('input', scheduleRefreshPreviews);
+document.getElementById('heroFont').addEventListener('change', scheduleRefreshPreviews);
+
+// The hero-title font picker offers the same faces as the main heading
+// font, plus a leading option to just inherit whatever that's set to.
+(() => {
+  const heroFontSelect = document.getElementById('heroFont');
+  const inherit = document.createElement('option');
+  inherit.value = '';
+  inherit.textContent = '(use heading font)';
+  heroFontSelect.appendChild(inherit);
+  document.querySelectorAll('#fontHeading option').forEach((opt) => {
+    const clone = document.createElement('option');
+    clone.value = opt.value;
+    clone.textContent = opt.textContent.replace(' (default)', '');
+    heroFontSelect.appendChild(clone);
+  });
+})();
 
 document.getElementById('resetDesignBtn').addEventListener('click', () => {
   populateDesignFields({});
@@ -1173,6 +1205,7 @@ function populateDesignFields(design = {}) {
   document.getElementById('heroTextColor').value = design.heroTextColor || '';
   document.getElementById('heroTextColorPicker').value = design.heroTextColor || '#ffffff';
   document.getElementById('heroContrast').value = design.heroContrast != null ? design.heroContrast : 1;
+  document.getElementById('heroFont').value = design.heroFont || '';
 }
 
 function readDesignFields() {
@@ -1182,6 +1215,7 @@ function readDesignFields() {
     accentColor: document.getElementById('accentColor').value,
     accentColor2: document.getElementById('accentColor2').value,
     heroTextColor: document.getElementById('heroTextColor').value,
+    heroFont: document.getElementById('heroFont').value,
     heroContrast: Number(document.getElementById('heroContrast').value)
   };
 }
