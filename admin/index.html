@@ -365,7 +365,7 @@
           <div>
             <label for="fontHeading">Heading font</label>
             <select id="fontHeading">
-              <option value="Unbounded">Unbounded (default)</option>
+              <option value="Unbounded">Unbounded</option>
               <option value="Bungee">Bungee</option>
               <option value="Monoton">Monoton</option>
               <option value="Anton">Anton</option>
@@ -381,7 +381,7 @@
               <option value="Poppins">Poppins</option>
               <option value="Comfortaa">Comfortaa</option>
               <option value="Passion One">Passion One</option>
-              <option value="Space Grotesk">Space Grotesk</option>
+              <option value="Space Grotesk">Space Grotesk (default)</option>
               <option value="Playfair Display">Playfair Display</option>
               <option value="Archivo Black">Archivo Black</option>
               <option value="DM Serif Display">DM Serif Display</option>
@@ -1196,7 +1196,7 @@ document.getElementById('resetDesignBtn').addEventListener('click', () => {
 });
 
 function populateDesignFields(design = {}) {
-  document.getElementById('fontHeading').value = design.fontHeading || 'Unbounded';
+  document.getElementById('fontHeading').value = design.fontHeading || 'Space Grotesk';
   document.getElementById('fontBody').value = design.fontBody || 'Inter';
   document.getElementById('accentColor').value = design.accentColor || '#ff2e93';
   document.getElementById('accentColorPicker').value = design.accentColor || '#ff2e93';
