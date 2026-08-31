@@ -442,6 +442,25 @@
             <p class="hint">Applies to the big homepage title and the "afrobeats · amapiano · afrohouse" tagline beneath it. Uses the Heading font above by default — pick something different here to give just that intro text its own look.</p>
           </div>
         </div>
+        <div class="row row-2">
+          <div>
+            <label for="iconColor">Icon color</label>
+            <div class="color-row">
+              <input type="color" id="iconColorPicker" value="#ffffff">
+              <input type="text" id="iconColor" placeholder="Leave empty for the default text color">
+            </div>
+            <p class="hint">Recolors the social icons, hamburger menu icon, and audio button across both sites.</p>
+          </div>
+          <div>
+            <label for="iconContrast">Icon backdrop contrast</label>
+            <div class="zoom-row" style="margin-top: 8px;">
+              <span>None</span>
+              <input type="range" min="0" max="1" step="0.05" value="0" id="iconContrast" style="max-width: none; flex: 1;">
+              <span>Solid</span>
+            </div>
+            <p class="hint">Adds a solid backdrop behind the social icons so they stand out more against busy backgrounds.</p>
+          </div>
+        </div>
       </div>
 
       <div class="section">
@@ -1173,6 +1192,8 @@ syncColorPair('accentColor2Picker', 'accentColor2');
 syncColorPair('heroTextColorPicker', 'heroTextColor');
 document.getElementById('heroContrast').addEventListener('input', scheduleRefreshPreviews);
 document.getElementById('heroFont').addEventListener('change', scheduleRefreshPreviews);
+syncColorPair('iconColorPicker', 'iconColor');
+document.getElementById('iconContrast').addEventListener('input', scheduleRefreshPreviews);
 
 // The hero-title font picker offers the same faces as the main heading
 // font, plus a leading option to just inherit whatever that's set to.
@@ -1206,6 +1227,9 @@ function populateDesignFields(design = {}) {
   document.getElementById('heroTextColorPicker').value = design.heroTextColor || '#ffffff';
   document.getElementById('heroContrast').value = design.heroContrast != null ? design.heroContrast : 1;
   document.getElementById('heroFont').value = design.heroFont || '';
+  document.getElementById('iconColor').value = design.iconColor || '';
+  document.getElementById('iconColorPicker').value = design.iconColor || '#ffffff';
+  document.getElementById('iconContrast').value = design.iconContrast != null ? design.iconContrast : 0;
 }
 
 function readDesignFields() {
@@ -1216,7 +1240,9 @@ function readDesignFields() {
     accentColor2: document.getElementById('accentColor2').value,
     heroTextColor: document.getElementById('heroTextColor').value,
     heroFont: document.getElementById('heroFont').value,
-    heroContrast: Number(document.getElementById('heroContrast').value)
+    heroContrast: Number(document.getElementById('heroContrast').value),
+    iconColor: document.getElementById('iconColor').value,
+    iconContrast: Number(document.getElementById('iconContrast').value)
   };
 }
 
