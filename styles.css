@@ -219,6 +219,11 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  /* Fallback background-image (set from JS, media.heroPosterUrl) shows
+     through whenever the video isn't actively painting a frame — still
+     loading, blocked, or failed to play — instead of leaving this blank. */
+  background-size: cover;
+  background-position: center;
 }
 .hero-photo {
   width: 100%;
