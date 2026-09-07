@@ -723,6 +723,11 @@ select option { background: var(--bg); }
 }
 .footer-inner p { font-size: 0.78rem; color: var(--text-dim); }
 
+.events-empty {
+  color: var(--text-dim);
+  padding: 8px 0;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .bio-grid, .booking-grid { grid-template-columns: 1fr; }
