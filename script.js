@@ -311,6 +311,11 @@ function renderContent(data) {
   if (data.design?.iconColor) root.setProperty('--icon-color', data.design.iconColor);
   else root.removeProperty('--icon-color');
   root.setProperty('--icon-contrast', data.design?.iconContrast != null ? Number(data.design.iconContrast) : 0);
+  // The neon site's stylesheet is the only one that currently reads
+  // --glass-intensity (its "Liquid Glass" header/buttons/cards) — set here
+  // too just so this site's CSS custom properties stay in sync with the
+  // shared design data, in case a glass look is ever added here as well.
+  root.setProperty('--glass-intensity', data.design?.glassIntensity != null ? Number(data.design.glassIntensity) : 0.6);
 
   const heroVideoSource = document.getElementById('heroVideoSource');
   const heroVideo = document.getElementById('heroVideo');
