@@ -69,32 +69,16 @@
       "previewUrl": ""
     }
   ],
-  "events": [
+  "events": [],
+  "merch": [],
+  "unavailableDates": [
     {
-      "imagePosition": "50% 50%",
-      "imageZoom": "1",
-      "date": "2026-10-31",
-      "title": "Maji Mazuri Amapiano After dark",
-      "venue": "Naco taco ",
-      "ticketUrl": "https://posh.vip/e/maji-mazuri-halloween-edition",
-      "imageUrl": "https://samnate17.github.io/halisi-website/uploads/1791777193074-img-2266.jpg",
-      "day": "31",
-      "month": "Oct"
+      "date": "2026-12-09"
     },
     {
-      "imagePosition": "50% 50%",
-      "imageZoom": "1",
-      "date": "2026-11-12",
-      "title": "Maji Mazuri Road to Dezemba",
-      "venue": "middlesex lounge",
-      "ticketUrl": "https://posh.vip/e/maji-mazuri-road-to-dezemba?t=majilinktree",
-      "imageUrl": "https://samnate17.github.io/halisi-website/uploads/1793931621808-img-2492.jpeg",
-      "day": "12",
-      "month": "Nov"
+      "date": "2026-12-15"
     }
   ],
-  "merch": [],
-  "unavailableDates": [],
   "booking": {
     "blurb": "Private gigs, clubs, and day parties. Send the details below and expect a reply within 48 hours.",
     "email": "halisidj@gmail.com"
